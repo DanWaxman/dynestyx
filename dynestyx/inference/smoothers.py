@@ -37,6 +37,9 @@ from dynestyx.inference.integrations.cuthbert.discrete_smoother import (
 from dynestyx.inference.integrations.cuthbert.discrete_smoother import (
     run_discrete_smoother as run_cuthbert_discrete_smoother,
 )
+from dynestyx.inference.integrations.cuthbert.factorial_smoother import (
+    run_factorial_smoother,
+)
 from dynestyx.inference.plate_utils import (
     _array_plate_axis,
     _make_plate_in_axes,
@@ -49,11 +52,16 @@ from dynestyx.inference.smoother_configs import (
     ContinuousTimeSmootherConfigs,
     DiscreteTimeSmootherConfigs,
     EKFSmootherConfig,
+    FactorialEKFSmootherConfig,
+    FactorialKFSmootherConfig,
+    FactorialPFSmootherConfig,
+    FactorialSmootherConfigs,
     KFSmootherConfig,
     PFSmootherConfig,
     UKFSmootherConfig,
 )
 from dynestyx.models import DynamicalModel
+from dynestyx.models.factorial import FactorialDynamicalModel
 from dynestyx.types import FunctionOfTime
 from dynestyx.utils import _dist_has_plate_batch_dims
 
@@ -63,11 +71,18 @@ DiscreteSmootherConfig = (
 ContinuousSmootherConfig = (
     ContinuousTimeKFSmootherConfig | ContinuousTimeEKFSmootherConfig
 )
-SmootherAnyConfig = DiscreteSmootherConfig | ContinuousSmootherConfig
+FactorialSmootherConfig = (
+    FactorialEKFSmootherConfig | FactorialKFSmootherConfig | FactorialPFSmootherConfig
+)
+SmootherAnyConfig = (
+    DiscreteSmootherConfig | ContinuousSmootherConfig | FactorialSmootherConfig
+)
 
 
 def _default_smoother_config(dynamics: DynamicalModel) -> SmootherAnyConfig:
     """Return an appropriate default smoother config when none is specified."""
+    if isinstance(dynamics, FactorialDynamicalModel):
+        return FactorialEKFSmootherConfig()
     if dynamics.continuous_time:
         return ContinuousTimeEKFSmootherConfig()
     return EKFSmootherConfig(filter_source="cuthbert")
@@ -228,6 +243,29 @@ class Smoother(BaseSmootherLogFactorAdder):
                 "Expected a smoother config class from dynestyx.inference.smoother_configs. "
                 f"Valid types: {valid}"
             )
+
+        if isinstance(dynamics, FactorialDynamicalModel):
+            if plate_shapes:
+                raise ValueError(
+                    "FactorialDynamicalModel does not support dsx.plate yet."
+                )
+            if not isinstance(config, FactorialSmootherConfigs):
+                valid = [c.__name__ for c in FactorialSmootherConfigs]
+                raise ValueError(
+                    "FactorialDynamicalModel requires a factorial smoother config "
+                    f"(got {type(config).__name__}). Valid types: {valid}."
+                )
+            key = numpyro.prng_key() if config.crn_seed is None else config.crn_seed
+            return run_factorial_smoother(
+                name,
+                dynamics,
+                config,
+                key=key,
+                obs_times=obs_times,
+                obs_values=obs_values,
+                **kwargs,
+            )
+
         _validate_missing_observation_support(
             config,
             obs_values=obs_values,

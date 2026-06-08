@@ -6,11 +6,12 @@ import numpyro
 from effectful.ops.semantics import fwd, handler
 from effectful.ops.syntax import ObjectInterpretation, defop, implements
 from effectful.ops.types import NotHandled
-from jaxtyping import Array, Real
+from jaxtyping import Array, Int, Real
 
 from dynestyx.models import (
     DynamicalModel,
 )
+from dynestyx.models.factorial import FactorialDynamicalModel
 from dynestyx.types import FunctionOfTime
 from dynestyx.utils import (
     _get_dynamics_with_t0,
@@ -20,6 +21,78 @@ from dynestyx.utils import (
 )
 
 T = TypeVar("T")
+
+
+def _validate_factorial_indices(
+    dynamics: DynamicalModel,
+    *,
+    obs_times,
+    obs_factor_indices,
+    predict_times,
+    predict_factor_indices,
+) -> None:
+    """Validate the ``obs_factor_indices`` / ``predict_factor_indices`` kwargs.
+
+    Factorial models require per-observation factor indices; non-factorial models
+    must not receive them.
+    """
+    is_factorial = isinstance(dynamics, FactorialDynamicalModel)
+    if not is_factorial:
+        if obs_factor_indices is not None or predict_factor_indices is not None:
+            raise ValueError(
+                "obs_factor_indices/predict_factor_indices are only valid for a "
+                "FactorialDynamicalModel."
+            )
+        return
+
+    n_local = dynamics.num_local_factors
+    n_factors = dynamics.num_factors
+
+    def _check(arr, times, name, times_name):
+        if times is None:
+            if arr is not None:
+                raise ValueError(f"{name} was provided without {times_name}.")
+            return
+        if arr is None:
+            raise ValueError(
+                f"FactorialDynamicalModel requires {name} (an int array of shape "
+                f"(num_observations, num_local_factors)=(..., {n_local})) "
+                f"when {times_name} is provided."
+            )
+        if arr.ndim != 2 or arr.shape[-1] != n_local:
+            raise ValueError(
+                f"{name} must have shape (num_observations, num_local_factors="
+                f"{n_local}); got {tuple(arr.shape)}."
+            )
+        n_obs = times.shape[-1]
+        if arr.shape[0] != n_obs:
+            raise ValueError(
+                f"{name} has {arr.shape[0]} rows but {times_name} has {n_obs} "
+                "time steps; they must match."
+            )
+        # Best-effort host-side bounds check (skipped under tracing).
+        try:
+            import numpy as _np
+
+            arr_host = _np.asarray(arr)
+            if arr_host.size and (arr_host.min() < 0 or arr_host.max() >= n_factors):
+                raise ValueError(
+                    f"{name} contains factor indices outside [0, "
+                    f"{n_factors}); got min={int(arr_host.min())}, "
+                    f"max={int(arr_host.max())}."
+                )
+        except (TypeError, ValueError) as exc:
+            if isinstance(exc, ValueError) and "factor indices outside" in str(exc):
+                raise
+            # Traced arrays: cannot check bounds here.
+
+    _check(obs_factor_indices, obs_times, "obs_factor_indices", "obs_times")
+    _check(
+        predict_factor_indices,
+        predict_times,
+        "predict_factor_indices",
+        "predict_times",
+    )
 
 
 def sample(
@@ -35,6 +108,8 @@ def sample(
     | Real[Array, "*ctrl_value_plate ctrl_time"]
     | None = None,
     predict_times: Real[Array, "*predict_time_plate predict_time"] | None = None,
+    obs_factor_indices: Int[Array, "*obs_factor_index_shape"] | None = None,
+    predict_factor_indices: Int[Array, "*predict_factor_index_shape"] | None = None,
     **kwargs,
 ) -> FunctionOfTime:
     """
@@ -60,6 +135,11 @@ def sample(
         ctrl_times: Times at which to sample the controls.
         ctrl_values: Values of the controls at the given times.
         predict_times: Times at which to predict the observations.
+        obs_factor_indices: For a `FactorialDynamicalModel` only, an integer array
+            of shape `(num_observations, num_local_factors)` giving the factor
+            (e.g. team) indices involved in each observation (e.g. home/away).
+        predict_factor_indices: For a `FactorialDynamicalModel` only, the analogous
+            `(num_predictions, num_local_factors)` indices for `predict_times`.
         **kwargs: Additional keyword arguments.
 
     Returns:
@@ -104,6 +184,13 @@ def sample(
 
     _validate_controls(obs_times, predict_times, ctrl_times, ctrl_values)
     _validate_control_dim(dynamics, ctrl_values)
+    _validate_factorial_indices(
+        dynamics,
+        obs_times=obs_times,
+        obs_factor_indices=obs_factor_indices,
+        predict_times=predict_times,
+        predict_factor_indices=predict_factor_indices,
+    )
 
     # Initial dynamics may not have t0, which is then inferred from obs_times
     dynamics_with_t0 = _get_dynamics_with_t0(dynamics, obs_times, predict_times)
@@ -117,6 +204,8 @@ def sample(
         ctrl_times=ctrl_times,
         ctrl_values=ctrl_values,
         predict_times=predict_times,
+        obs_factor_indices=obs_factor_indices,
+        predict_factor_indices=predict_factor_indices,
         **kwargs,
     )
 
@@ -135,6 +224,8 @@ def _sample_intp(
     | Real[Array, "*ctrl_value_plate ctrl_time"]
     | None = None,
     predict_times: Real[Array, "*predict_time_plate predict_time"] | None = None,
+    obs_factor_indices: Int[Array, "*obs_factor_index_shape"] | None = None,
+    predict_factor_indices: Int[Array, "*predict_factor_index_shape"] | None = None,
     **kwargs,
 ) -> FunctionOfTime:
     """

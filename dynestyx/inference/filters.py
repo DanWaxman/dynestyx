@@ -32,6 +32,8 @@ from dynestyx.inference.filter_configs import (
     DiscreteTimeConfigs,
     EKFConfig,
     EnKFConfig,
+    FactorialConfigs,
+    FactorialEKFConfig,
     HMMConfig,
     HMMConfigs,
     KFConfig,
@@ -57,12 +59,16 @@ from dynestyx.inference.integrations.cuthbert.discrete import (
 from dynestyx.inference.integrations.cuthbert.discrete import (
     run_discrete_filter as run_cuthbert_discrete,
 )
+from dynestyx.inference.integrations.cuthbert.factorial_filter import (
+    run_factorial_filter,
+)
 from dynestyx.inference.plate_utils import (
     _array_plate_axis,
     _make_plate_in_axes,
     _slice_dist_for_plate_member,
 )
 from dynestyx.models import DynamicalModel
+from dynestyx.models.factorial import FactorialDynamicalModel
 from dynestyx.types import FunctionOfTime
 from dynestyx.utils import _dist_has_plate_batch_dims
 
@@ -138,6 +144,8 @@ class BaseLogFactorAdder(ObjectInterpretation, HandlesSelf):
 
 def _default_filter_config(dynamics: DynamicalModel):
     """Return appropriate default filter config when none specified."""
+    if isinstance(dynamics, FactorialDynamicalModel):
+        return FactorialEKFConfig()
     if dynamics.continuous_time:
         return ContinuousTimeEnKFConfig()
 
@@ -236,6 +244,29 @@ class Filter(BaseLogFactorAdder):
             if self.filter_config is not None
             else _default_filter_config(dynamics)
         )
+
+        if isinstance(dynamics, FactorialDynamicalModel):
+            if plate_shapes:
+                raise ValueError(
+                    "FactorialDynamicalModel does not support dsx.plate yet."
+                )
+            if not isinstance(config, FactorialConfigs):
+                valid = [c.__name__ for c in FactorialConfigs]
+                raise ValueError(
+                    "FactorialDynamicalModel requires a factorial filter config "
+                    f"(got {type(config).__name__}). Valid types: {valid}."
+                )
+            key = numpyro.prng_key() if config.crn_seed is None else config.crn_seed
+            return run_factorial_filter(
+                name,
+                dynamics,
+                config,
+                key=key,
+                obs_times=obs_times,
+                obs_values=obs_values,
+                **kwargs,
+            )
+
         if isinstance(config, BaseFilterConfig):
             _validate_missing_observation_support(
                 config,
@@ -642,6 +673,8 @@ __all__ = [
     "ContinuousTimeUKFConfig",
     "EKFConfig",
     "EnKFConfig",
+    "FactorialConfigs",
+    "FactorialEKFConfig",
     "Filter",
     "HMMConfig",
     "HMMConfigs",

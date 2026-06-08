@@ -6,7 +6,17 @@ __version__ = version("dynestyx")
 
 from dynestyx.discretizers import Discretizer, euler_maruyama
 from dynestyx.handlers import plate, sample
+from dynestyx.inference.filter_configs import (
+    FactorialEKFConfig,
+    FactorialKFConfig,
+    FactorialPFConfig,
+)
 from dynestyx.inference.filters import Filter
+from dynestyx.inference.smoother_configs import (
+    FactorialEKFSmootherConfig,
+    FactorialKFSmootherConfig,
+    FactorialPFSmootherConfig,
+)
 from dynestyx.inference.smoothers import Smoother
 from dynestyx.models import (
     ContinuousTimeStateEvolution,
@@ -16,6 +26,7 @@ from dynestyx.models import (
     DiracIdentityObservation,
     DiscreteTimeStateEvolution,
     DynamicalModel,
+    FactorialDynamicalModel,
     FullDiffusion,
     GaussianObservation,
     GaussianStateEvolution,
@@ -23,9 +34,12 @@ from dynestyx.models import (
     LinearGaussianStateEvolution,
     LTI_continuous,
     LTI_discrete,
+    MatchOutcomeObservation,
     ObservationModel,
+    RandomWalkEvolution,
     ScalarDiffusion,
     StochasticContinuousTimeStateEvolution,
+    factorial_outcome_probabilities,
 )
 from dynestyx.simulators import (
     DiscreteTimeSimulator,
@@ -46,6 +60,16 @@ __all__ = [
     "StochasticContinuousTimeStateEvolution",
     "DiscreteTimeStateEvolution",
     "DynamicalModel",
+    "FactorialDynamicalModel",
+    "RandomWalkEvolution",
+    "MatchOutcomeObservation",
+    "factorial_outcome_probabilities",
+    "FactorialEKFConfig",
+    "FactorialKFConfig",
+    "FactorialPFConfig",
+    "FactorialEKFSmootherConfig",
+    "FactorialKFSmootherConfig",
+    "FactorialPFSmootherConfig",
     "AffineDrift",
     "LTI_continuous",
     "LTI_discrete",
