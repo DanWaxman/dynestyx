@@ -1387,6 +1387,118 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../deep_dives/factorial_world_cup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Attack/defense bivariate-Poisson models for World Cup scores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../deep_dives/duffield_tennis_wta/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducing Duffield et al. (2024) — Tennis (WTA)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../deep_dives/duffield_chess/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducing Duffield et al. (2024) — Chess
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../deep_dives/duffield_football_epl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducing Duffield et al. (2024) — Football (EPL)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3407,6 +3519,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dynestyx.inference.filters.FactorialEKFConfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FactorialEKFConfig
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#dynestyx.inference.filters.Filter" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5090,6 +5213,87 @@ inverse problems, where other particle methods like particle filters often strug
 </code></pre></div>
 
 </details>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="dynestyx.inference.filters.FactorialEKFConfig" class="doc doc-heading">
+            <code>FactorialEKFConfig</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#dynestyx.inference.filters.FactorialEKFConfig" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="EKFConfig
+
+
+  
+      dataclass
+   (dynestyx.inference.filter_configs.EKFConfig)" href="../filter_configs/#dynestyx.inference.filter_configs.EKFConfig">EKFConfig</a></code></p>
+
+
+
+        <p>Extended Kalman Filter for <strong>factorial</strong> state-space models.</p>
+<p>The default (and recommended) filter for factorial models with non-linear or
+non-Gaussian local observations, such as the sigmoidal match-outcome model of
+Duffield et al. (2024). Each pairwise update linearizes the local observation
+via JAX autodiff (the cuthbert Taylor/linearized Kalman backend) over only the
+factors involved in that observation.</p>
+<p>Used only with a :class:<code>~dynestyx.models.FactorialDynamicalModel</code>; the factor
+indices for each observation are supplied via the <code>obs_factor_indices</code>
+keyword of <code>dsx.sample</code>. Associative/parallel-in-time scans are not
+supported for factorial filtering.</p>
+
+
+<details class="note" open>
+  <summary>Note</summary>
+  <p>For <em>local</em> observations that depend only on a contrast of the involved
+factors (e.g. a match outcome depending on the skill <em>difference</em>), the
+Taylor linearization of the observation potential is rank-deficient, so
+the marginal log-likelihood is <strong>not differentiable</strong> through this filter
+(gradients are NaN). This matches Duffield et al. (2024), who estimate
+parameters via EM / dedicated estimators rather than autodiff. Use the
+EKF for forward filtering (current rankings), smoothing (historical
+trajectories), and prediction; for <em>gradient-based</em> parameter inference
+use :class:<code>FactorialPFConfig</code> (or a grid/profile likelihood over the EKF
+forward pass).</p>
+</details>        <p>See :class:<code>EKFConfig</code> for the (inherited) tuning and recording options.</p>
 
 
 
