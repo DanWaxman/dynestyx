@@ -45,7 +45,8 @@ nav:
       - Discrete time LTI profile likelihood: deep_dives/discrete_time_lti_profile_likelihood.ipynb
       - Continuous-time LTI profile likelihood: deep_dives/continuous_time_lti_profile_likelihood.ipynb
       - GP prior on drift (FitzHugh-Nagumo): deep_dives/gp_drift.ipynb
-  - API Reference: 
+      - Factorial models for World Cup skill rating: deep_dives/factorial_world_cup.ipynb
+  - API Reference:
     - api_reference/index.md
     - Public API:
       - Overview: api_reference/public/index.md
