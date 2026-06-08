@@ -8,6 +8,9 @@ from dynestyx.inference.filter_configs import (
     ContinuousTimeEKFConfig,
     ContinuousTimeKFConfig,
     EKFConfig,
+    FactorialEKFConfig,
+    FactorialKFConfig,
+    FactorialPFConfig,
     KFConfig,
     PFConfig,
     UKFConfig,
@@ -354,6 +357,58 @@ class ContinuousTimeEKFSmootherConfig(ContinuousTimeEKFConfig, BaseSmootherConfi
     """
 
 
+@dataclasses.dataclass
+class FactorialEKFSmootherConfig(FactorialEKFConfig, BaseSmootherConfig):
+    r"""Extended Kalman Smoother for **factorial** state-space models.
+
+    The smoother corresponding to :class:`FactorialEKFConfig`. Smoothing in a
+    factorial model is embarrassingly parallel across factors (the local
+    observations are fully absorbed during filtering), so each factor's skill
+    trajectory is smoothed independently with a single-factor backward pass.
+
+    The marginal log-likelihood reported as a NumPyro factor comes from the
+    forward filtering pass. See :class:`FactorialEKFConfig` for inherited options
+    and ``BaseSmootherConfig`` for the ``record_smoothed_*`` options.
+    """
+
+
+@dataclasses.dataclass
+class FactorialKFSmootherConfig(FactorialKFConfig, BaseSmootherConfig):
+    r"""Exact Kalman (RTS) Smoother for **factorial** linear-Gaussian models.
+
+    The smoother corresponding to :class:`FactorialKFConfig`. See that class and
+    ``BaseSmootherConfig`` for inherited options.
+    """
+
+
+@dataclasses.dataclass
+class FactorialPFSmootherConfig(FactorialPFConfig, BaseSmootherConfig):
+    r"""Particle smoother for **factorial** state-space models.
+
+    The smoother corresponding to :class:`FactorialPFConfig`. See that class and
+    ``BaseSmootherConfig`` for inherited options.
+
+    Attributes:
+        pf_backward_sampling_method (PFBackwardSamplingMethod): Backward
+            simulation method. Defaults to ``"tracing"``.
+        pf_mcmc_n_steps (int): MCMC steps when
+            ``pf_backward_sampling_method="mcmc"``.
+        pf_n_smoother_particles (int | None): Number of backward-sampled smoother
+            particles. ``None`` inherits ``n_particles``.
+    """
+
+    pf_backward_sampling_method: PFBackwardSamplingMethod = "tracing"
+    pf_mcmc_n_steps: int = 10
+    pf_n_smoother_particles: int | None = None
+
+
+FactorialSmootherConfigs: tuple[type, ...] = (
+    FactorialEKFSmootherConfig,
+    FactorialKFSmootherConfig,
+    FactorialPFSmootherConfig,
+)
+
+
 DiscreteTimeSmootherConfigs: tuple[type, ...] = (
     KFSmootherConfig,
     EKFSmootherConfig,
@@ -388,6 +443,10 @@ __all__ = [
     "ContinuousTimeSmootherConfigs",
     "DiscreteTimeSmootherConfigs",
     "EKFSmootherConfig",
+    "FactorialEKFSmootherConfig",
+    "FactorialKFSmootherConfig",
+    "FactorialPFSmootherConfig",
+    "FactorialSmootherConfigs",
     "KFSmootherConfig",
     "PFBackwardSamplingMethod",
     "PFSmootherConfig",

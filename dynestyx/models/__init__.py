@@ -18,6 +18,12 @@ from dynestyx.models.diffusions import (
     FullDiffusion,
     ScalarDiffusion,
 )
+from dynestyx.models.factorial import (
+    FactorialDynamicalModel,
+    MatchOutcomeObservation,
+    RandomWalkEvolution,
+    factorial_outcome_probabilities,
+)
 from dynestyx.models.lti_dynamics import LTI_continuous, LTI_discrete
 from dynestyx.models.observations import (
     DiracIdentityObservation,
@@ -40,12 +46,16 @@ __all__ = [
     "DiagonalDiffusion",
     "DynamicalModel",
     "Drift",
+    "FactorialDynamicalModel",
     "FullDiffusion",
     "GaussianObservation",
     "GaussianStateEvolution",
     "LinearGaussianObservation",
     "LinearGaussianStateEvolution",
+    "MatchOutcomeObservation",
     "ObservationModel",
+    "RandomWalkEvolution",
+    "factorial_outcome_probabilities",
     "StochasticContinuousTimeStateEvolution",
     "LTI_continuous",
     "LTI_discrete",

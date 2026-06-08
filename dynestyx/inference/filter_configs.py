@@ -724,6 +724,83 @@ class HMMConfig(BaseFilterConfig):
 HMMConfigs: tuple[type, ...] = (HMMConfig,)
 
 
+@dataclasses.dataclass
+class FactorialEKFConfig(EKFConfig):
+    r"""Extended Kalman Filter for **factorial** state-space models.
+
+    The default (and recommended) filter for factorial models with non-linear or
+    non-Gaussian local observations, such as the sigmoidal match-outcome model of
+    Duffield et al. (2024). Each pairwise update linearizes the local observation
+    via JAX autodiff (the cuthbert Taylor/linearized Kalman backend) over only the
+    factors involved in that observation.
+
+    Used only with a :class:`~dynestyx.models.FactorialDynamicalModel`; the factor
+    indices for each observation are supplied via the ``obs_factor_indices``
+    keyword of ``dsx.sample``. Associative/parallel-in-time scans are not
+    supported for factorial filtering.
+
+    Note:
+        For *local* observations that depend only on a contrast of the involved
+        factors (e.g. a match outcome depending on the skill *difference*), the
+        Taylor linearization of the observation potential is rank-deficient, so
+        the marginal log-likelihood is **not differentiable** through this filter
+        (gradients are NaN). This matches Duffield et al. (2024), who estimate
+        parameters via EM / dedicated estimators rather than autodiff. Use the
+        EKF for forward filtering (current rankings), smoothing (historical
+        trajectories), and prediction; for *gradient-based* parameter inference
+        use :class:`FactorialPFConfig` (or a grid/profile likelihood over the EKF
+        forward pass).
+
+    See :class:`EKFConfig` for the (inherited) tuning and recording options.
+    """
+
+    filter_source: CuthbertOnlyFilterSource = "cuthbert"
+
+
+@dataclasses.dataclass
+class FactorialKFConfig(KFConfig):
+    r"""Exact Kalman Filter for **factorial** linear-Gaussian state-space models.
+
+    The exact Bayesian filter for factorial models whose per-factor dynamics and
+    *local* observations are both linear-Gaussian (e.g. a Gaussian score-margin
+    observation). For the non-Gaussian match-outcome model, use
+    :class:`FactorialEKFConfig` (EKF) or :class:`FactorialPFConfig` (PF) instead.
+
+    Associative/parallel filtering is not supported for factorial models, so
+    ``associative`` is forced to ``False``.
+
+    See :class:`KFConfig` for the (inherited) options.
+    """
+
+    filter_source: CuthbertOnlyFilterSource = "cuthbert"  # type: ignore[assignment]
+
+    def __post_init__(self):
+        # Factorial filtering is sequential; never use cuthbert's associative scan.
+        self.associative = False
+
+
+@dataclasses.dataclass
+class FactorialPFConfig(PFConfig):
+    r"""Bootstrap Particle Filter for **factorial** state-space models.
+
+    A fully general factorial filter for arbitrary non-linear/non-Gaussian
+    per-factor dynamics and local observations. Resampling is performed within
+    the factorial ``join`` step (the base SMC filter uses no resampling), per the
+    cuthbert factorial SMC convention.
+
+    See :class:`PFConfig` for the (inherited) particle/resampling options.
+    """
+
+    filter_source: CuthbertOnlyFilterSource = "cuthbert"
+
+
+FactorialConfigs: tuple[type, ...] = (
+    FactorialEKFConfig,
+    FactorialKFConfig,
+    FactorialPFConfig,
+)
+
+
 def _config_to_record_kwargs(config: BaseFilterConfig) -> dict:
     """Build record_kwargs dict from config. Config must have all record_* fields."""
     if isinstance(config, HMMConfig):
