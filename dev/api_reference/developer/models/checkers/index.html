@@ -12,29 +12,31 @@
         <meta name="author" content="Basis Research Institute">
       
       
-        <link rel="canonical" href="https://basisresearch.github.io/dynestyx/dev/versioning/">
+        <link rel="canonical" href="https://basisresearch.github.io/dynestyx/dev/api_reference/developer/models/checkers/">
       
       
-        <link rel="prev" href="../faq/">
+        <link rel="prev" href="../specialized_models/">
       
+      
+        <link rel="next" href="../../inference/filters/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Versioned documentation - dynestyx documentation</title>
+        <title>Checkers - dynestyx documentation</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,9 +55,9 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#versioned-documentation" class="md-skip">
+        <a href="#model-checkers" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +98,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="dynestyx documentation" class="md-header__button md-logo" aria-label="dynestyx documentation" data-md-component="logo">
+    <a href="../../../.." title="dynestyx documentation" class="md-header__button md-logo" aria-label="dynestyx documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -116,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Versioned documentation
+              Checkers
             
           </span>
         </div>
@@ -206,7 +208,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../../../.." class="md-tabs__link">
         
   
   
@@ -227,7 +229,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../tutorials/quickstart/" class="md-tabs__link">
+        <a href="../../../../tutorials/quickstart/" class="md-tabs__link">
           
   
   
@@ -247,7 +249,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../tutorials/" class="md-tabs__link">
+        <a href="../../../../tutorials/" class="md-tabs__link">
           
   
   
@@ -263,11 +265,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../api_reference/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../" class="md-tabs__link">
           
   
   
@@ -285,34 +289,13 @@
   
   
     <li class="md-tabs__item">
-      <a href="../faq/" class="md-tabs__link">
+      <a href="../../../../faq/" class="md-tabs__link">
         
   
   
     
   
   FAQ
-
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-    
-  
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
-        
-  
-  
-    
-  
-  Versioned documentation
 
       </a>
     </li>
@@ -343,7 +326,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="dynestyx documentation" class="md-nav__button md-logo" aria-label="dynestyx documentation" data-md-component="logo">
+    <a href="../../../.." title="dynestyx documentation" class="md-nav__button md-logo" aria-label="dynestyx documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -373,7 +356,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../../../.." class="md-nav__link">
         
   
   
@@ -452,7 +435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/quickstart/" class="md-nav__link">
+      <a href="../../../../tutorials/quickstart/" class="md-nav__link">
         
   
   
@@ -480,7 +463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../math_intro/" class="md-nav__link">
+      <a href="../../../../math_intro/" class="md-nav__link">
         
   
   
@@ -560,7 +543,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/00_index/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/00_index/" class="md-nav__link">
         
   
   
@@ -588,7 +571,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/01_numpyro_bayesian_workflow/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/01_numpyro_bayesian_workflow/" class="md-nav__link">
         
   
   
@@ -616,7 +599,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/02_dynestyx_discrete_intro/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/02_dynestyx_discrete_intro/" class="md-nav__link">
         
   
   
@@ -644,7 +627,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/03_filtering_mll/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/03_filtering_mll/" class="md-nav__link">
         
   
   
@@ -672,7 +655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/04_filtering_nuts_pseudomarginal/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/04_filtering_nuts_pseudomarginal/" class="md-nav__link">
         
   
   
@@ -700,7 +683,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/05_svi/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/05_svi/" class="md-nav__link">
         
   
   
@@ -728,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/06_continuous_time/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/06_continuous_time/" class="md-nav__link">
         
   
   
@@ -756,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/06b_odes/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/06b_odes/" class="md-nav__link">
         
   
   
@@ -784,7 +767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/gentle_intro/07_hmm/" class="md-nav__link">
+      <a href="../../../../tutorials/gentle_intro/07_hmm/" class="md-nav__link">
         
   
   
@@ -792,6 +775,118 @@
     
   
     Part 7: Inference in Hidden Markov Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorials/gentle_intro/08_hierarchical_inference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 8: Hierarchical/Mixed-Effect Model Inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorials/gentle_intro/09_discrete_smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 9: Discrete-Time Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorials/gentle_intro/10_continuous_smoothing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 10: Continuous-Time Smoothing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorials/gentle_intro/11_missing_observations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part 11: Handling Missing Observations with Filters and Smoothers
   
 
     
@@ -879,7 +974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/" class="md-nav__link">
+      <a href="../../../../tutorials/" class="md-nav__link">
         
   
   
@@ -959,7 +1054,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../quick_example/" class="md-nav__link">
+      <a href="../../../../quick_example/" class="md-nav__link">
         
   
   
@@ -987,7 +1082,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/sde_non_gaussian_observations/" class="md-nav__link">
+      <a href="../../../../tutorials/sde_non_gaussian_observations/" class="md-nav__link">
         
   
   
@@ -1075,7 +1170,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deep_dives/l63_speedup_dirac_vs_enkf/" class="md-nav__link">
+      <a href="../../../../deep_dives/l63_speedup_dirac_vs_enkf/" class="md-nav__link">
         
   
   
@@ -1103,7 +1198,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../deep_dives/mcmc_inference_algorithm_comparison/" class="md-nav__link">
+      <a href="../../../../deep_dives/discrete_time_kf_associative_scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Associative Kalman Filters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../deep_dives/mcmc_inference_algorithm_comparison/" class="md-nav__link">
         
   
   
@@ -1131,7 +1254,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deep_dives/fhn_sparse_id/" class="md-nav__link">
+      <a href="../../../../deep_dives/fhn_sparse_id/" class="md-nav__link">
         
   
   
@@ -1159,14 +1282,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../deep_dives/discrete_time_lti_profile_likelihood/" class="md-nav__link">
+      <a href="../../../../deep_dives/lv_uode/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Profile likelihood for discrete-time LTI: KF vs EKF vs UKF vs PF
+    Universal ODE for Lotka–Volterra: recovering the unknown interaction term
   
 
     
@@ -1187,7 +1310,63 @@
   
   
     <li class="md-nav__item">
-      <a href="../deep_dives/gp_drift/" class="md-nav__link">
+      <a href="../../../../deep_dives/discrete_time_lti_profile_likelihood/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profile likelihood for discrete-time LTI: KF vs EnKF vs EKF vs UKF vs PF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../deep_dives/continuous_time_lti_profile_likelihood/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profile likelihood for continuous-time LTI: CD-KF vs CD-EKF vs CD-UKF vs CD-EnKF vs CD-DPF vs D-EKF vs D-EnKF vs D-DPF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../deep_dives/gp_drift/" class="md-nav__link">
         
   
   
@@ -1227,26 +1406,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -1264,7 +1448,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1282,7 +1466,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/" class="md-nav__link">
+      <a href="../../../" class="md-nav__link">
         
   
   
@@ -1316,17 +1500,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
         
           
-          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="">
             
   
   
@@ -1362,7 +1549,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/" class="md-nav__link">
+      <a href="../../../public/" class="md-nav__link">
         
   
   
@@ -1494,7 +1681,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/core/dynamical_model/" class="md-nav__link">
+      <a href="../../../public/models/core/dynamical_model/" class="md-nav__link">
         
   
   
@@ -1522,7 +1709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/core/continuous_time_state_evolution/" class="md-nav__link">
+      <a href="../../../public/models/core/continuous_time_state_evolution/" class="md-nav__link">
         
   
   
@@ -1550,7 +1737,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/core/discrete_time_state_evolution/" class="md-nav__link">
+      <a href="../../../public/models/core/diffusion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diffusion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../public/models/core/discrete_time_state_evolution/" class="md-nav__link">
         
   
   
@@ -1578,7 +1793,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/core/observation_model/" class="md-nav__link">
+      <a href="../../../public/models/core/observation_model/" class="md-nav__link">
         
   
   
@@ -1606,7 +1821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/core/drift/" class="md-nav__link">
+      <a href="../../../public/models/core/drift/" class="md-nav__link">
         
   
   
@@ -1634,7 +1849,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/core/potential/" class="md-nav__link">
+      <a href="../../../public/models/core/potential/" class="md-nav__link">
         
   
   
@@ -1722,7 +1937,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/specialized/linear_gaussian_observation/" class="md-nav__link">
+      <a href="../../../public/models/specialized/linear_gaussian_observation/" class="md-nav__link">
         
   
   
@@ -1750,7 +1965,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/specialized/gaussian_observation/" class="md-nav__link">
+      <a href="../../../public/models/specialized/gaussian_observation/" class="md-nav__link">
         
   
   
@@ -1778,7 +1993,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/specialized/linear_gaussian_state_evolution/" class="md-nav__link">
+      <a href="../../../public/models/specialized/linear_gaussian_state_evolution/" class="md-nav__link">
         
   
   
@@ -1806,7 +2021,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/specialized/affine_drift/" class="md-nav__link">
+      <a href="../../../public/models/specialized/gaussian_state_evolution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GaussianStateEvolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../public/models/specialized/affine_drift/" class="md-nav__link">
         
   
   
@@ -1834,7 +2077,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/specialized/lti_continuous/" class="md-nav__link">
+      <a href="../../../public/models/specialized/lti_continuous/" class="md-nav__link">
         
   
   
@@ -1862,7 +2105,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/models/specialized/lti_discrete/" class="md-nav__link">
+      <a href="../../../public/models/specialized/lti_discrete/" class="md-nav__link">
         
   
   
@@ -1958,7 +2201,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/inference/filters/" class="md-nav__link">
+      <a href="../../../public/inference/filters/" class="md-nav__link">
         
   
   
@@ -1986,7 +2229,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/inference/filter_configs/" class="md-nav__link">
+      <a href="../../../public/inference/filter_configs/" class="md-nav__link">
         
   
   
@@ -2014,7 +2257,63 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/inference/mcmc/" class="md-nav__link">
+      <a href="../../../public/inference/smoothers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../public/inference/smoother_configs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SmootherOptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../public/inference/mcmc/" class="md-nav__link">
         
   
   
@@ -2042,7 +2341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/inference/mcmc_configs/" class="md-nav__link">
+      <a href="../../../public/inference/mcmc_configs/" class="md-nav__link">
         
   
   
@@ -2130,7 +2429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/discretizers/discretizer/" class="md-nav__link">
+      <a href="../../../public/discretizers/discretizer/" class="md-nav__link">
         
   
   
@@ -2218,14 +2517,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/handlers/" class="md-nav__link">
+      <a href="../../../public/handlers/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Sample
+    Sample & Plate
   
 
     
@@ -2358,7 +2657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/simulators/overview/" class="md-nav__link">
+      <a href="../../../public/simulators/overview/" class="md-nav__link">
         
   
   
@@ -2386,7 +2685,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/simulators/overview/#basesimulator" class="md-nav__link">
+      <a href="../../../public/simulators/overview/#basesimulator" class="md-nav__link">
         
   
   
@@ -2414,7 +2713,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/simulators/simulator_wrapper/" class="md-nav__link">
+      <a href="../../../public/simulators/simulator_wrapper/" class="md-nav__link">
         
   
   
@@ -2442,7 +2741,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/simulators/discrete_time_simulator/" class="md-nav__link">
+      <a href="../../../public/simulators/discrete_time_simulator/" class="md-nav__link">
         
   
   
@@ -2470,7 +2769,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/simulators/ode_simulator/" class="md-nav__link">
+      <a href="../../../public/simulators/ode_simulator/" class="md-nav__link">
         
   
   
@@ -2498,7 +2797,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/simulators/sde_simulator/" class="md-nav__link">
+      <a href="../../../public/simulators/sde_simulator/" class="md-nav__link">
         
   
   
@@ -2594,7 +2893,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/public/diagnostics/plotting_utils/" class="md-nav__link">
+      <a href="../../../public/diagnostics/plotting_utils/" class="md-nav__link">
         
   
   
@@ -2635,26 +2934,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
         
           
-          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="">
             
   
   
@@ -2672,7 +2976,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2690,7 +2994,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/" class="md-nav__link">
+      <a href="../../" class="md-nav__link">
         
   
   
@@ -2715,8 +3019,10 @@
                 
   
   
+    
   
   
+  
     
     
     
@@ -2727,11 +3033,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" checked>
         
           
           <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
@@ -2752,7 +3058,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4_3_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2770,7 +3076,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/models/core_models/" class="md-nav__link">
+      <a href="../core_models/" class="md-nav__link">
         
   
   
@@ -2798,7 +3104,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/models/specialized_models/" class="md-nav__link">
+      <a href="../diffusions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diffusions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../specialized_models/" class="md-nav__link">
         
   
   
@@ -2814,6 +3148,224 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkers
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        checkers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._infer_observation_dim_in_plate_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _infer_observation_dim_in_plate_context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._infer_vector_dim_from_distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _infer_vector_dim_from_distribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._inside_numpyro_plate_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _inside_numpyro_plate_context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._is_categorical_distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _is_categorical_distribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._make_probe_state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _make_probe_state
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._unwrap_base_distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _unwrap_base_distribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._validate_categorical_state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _validate_categorical_state
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._validate_continuous_state_evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _validate_continuous_state_evolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._validate_continuous_time_flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _validate_continuous_time_flag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._validate_discrete_state_evolution_output_shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _validate_discrete_state_evolution_output_shape
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._validate_observation_dim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _validate_observation_dim
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynestyx.models.checkers._validate_state_dim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _validate_state_dim
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2886,7 +3438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/inference/filters/" class="md-nav__link">
+      <a href="../../inference/filters/" class="md-nav__link">
         
   
   
@@ -2914,7 +3466,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/inference/filter_configs/" class="md-nav__link">
+      <a href="../../inference/checkers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Checkers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../inference/filter_configs/" class="md-nav__link">
         
   
   
@@ -2942,7 +3522,91 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/inference/mcmc/" class="md-nav__link">
+      <a href="../../inference/smoothers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../inference/smoother_configs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SmootherOptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../smoothing_handoff.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smoothing Handoff
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../inference/mcmc/" class="md-nav__link">
         
   
   
@@ -2970,7 +3634,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/inference/mcmc_configs/" class="md-nav__link">
+      <a href="../../inference/mcmc_configs/" class="md-nav__link">
         
   
   
@@ -2998,7 +3662,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/inference/blackjax_integration/" class="md-nav__link">
+      <a href="../../inference/blackjax_integration/" class="md-nav__link">
         
   
   
@@ -3086,7 +3750,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/discretizers/discretizer/" class="md-nav__link">
+      <a href="../../discretizers/discretizer/" class="md-nav__link">
         
   
   
@@ -3174,7 +3838,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/simulators/" class="md-nav__link">
+      <a href="../../simulators/" class="md-nav__link">
         
   
   
@@ -3210,7 +3874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/handlers/" class="md-nav__link">
+      <a href="../../handlers/" class="md-nav__link">
         
   
   
@@ -3218,6 +3882,34 @@
     
   
     Handlers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Utils
   
 
     
@@ -3251,10 +3943,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_8" >
         
           
-          <label class="md-nav__link" for="__nav_4_3_7" id="__nav_4_3_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3_8" id="__nav_4_3_8_label" tabindex="0">
             
   
   
@@ -3272,8 +3964,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_3_7">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3290,7 +3982,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api_reference/developer/diagnostics/plotting_utils/" class="md-nav__link">
+      <a href="../../diagnostics/plotting_utils/" class="md-nav__link">
         
   
   
@@ -3341,7 +4033,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/" class="md-nav__link">
+      <a href="../../../../faq/" class="md-nav__link">
         
   
   
@@ -3357,169 +4049,6 @@
   
 
       </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Versioned documentation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Versioned documentation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#aliases" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Aliases
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installing-a-matching-package-version" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installing a matching package version
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#notebooks-and-api-drift" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Notebooks and API drift
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Notebooks and API drift">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optional-banner-cell-for-authors" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional: banner cell for authors
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#local-builds-maintainers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Local builds (maintainers)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ci" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CI
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="CI">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#manual-publish-backfill-workflow_dispatch" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Manual publish / backfill (workflow_dispatch)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3544,116 +4073,272 @@
   
 
 
-<h1 id="versioned-documentation">Versioned documentation<a class="headerlink" href="#versioned-documentation" title="Permanent link">&para;</a></h1>
-<p>The published site uses <strong><a href="https://github.com/jimporter/mike">mike</a></strong> with <strong><a href="https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/">MkDocs Material’s versioning</a></strong>. Each build is stored under a version id on the <code>gh-pages</code> branch; <strong>aliases</strong> point human-friendly names at those builds.</p>
-<h2 id="aliases">Aliases<a class="headerlink" href="#aliases" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Alias</th>
-<th>What it tracks</th>
-<th>When it updates</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong><code>latest</code></strong></td>
-<td>Documentation built from the <strong><code>main</code></strong> branch (development)</td>
-<td>Every push to <code>main</code></td>
-</tr>
-<tr>
-<td><strong><code>stable</code></strong></td>
-<td>Documentation built from the <strong>latest SemVer tag</strong> (e.g. <code>v0.0.1</code>)</td>
-<td>Every push of a tag matching <code>v*</code></td>
-</tr>
-</tbody>
-</table>
-<p>The <strong>default</strong> landing version (root URL of the site) is set to <strong><code>stable</code></strong> when a release tag is built, so casual visitors see docs that match the latest <strong>released</strong> package. Use the version menu in the header to switch to <strong><code>latest</code></strong> for API and tutorials that match <code>main</code>.</p>
-<div class="admonition note">
-<p class="admonition-title">GitHub Pages source</p>
-<p>The repository must serve Pages from the <strong><code>gh-pages</code> branch</strong> (folder <code>/</code> or <code>/root</code>), not from the older “GitHub Actions artifact” flow. If you previously deployed with <code>actions/deploy-pages</code> + <code>upload-pages-artifact</code>, switch <strong>Settings → Pages → Build and deployment → Branch → <code>gh-pages</code></strong>.</p>
-</div>
-<h2 id="installing-a-matching-package-version">Installing a matching package version<a class="headerlink" href="#installing-a-matching-package-version" title="Permanent link">&para;</a></h2>
-<p>To reproduce examples against a <strong>released</strong> API:</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">dynestyx</span><span class="o">==</span><span class="m">0</span>.0.1
-</code></pre></div>
-<p>To work against <strong><code>main</code></strong> (same as <strong>latest</strong> docs):</p>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/BasisResearch/dynestyx.git
-</code></pre></div>
-<h2 id="notebooks-and-api-drift">Notebooks and API drift<a class="headerlink" href="#notebooks-and-api-drift" title="Permanent link">&para;</a></h2>
-<p>Tutorials and deep dives are <strong><code>.ipynb</code> files in this repo</strong>. There is <strong>one notebook tree</strong>: it always reflects the <strong>tip of <code>main</code></strong>. Tagged releases do <strong>not</strong> carry a second copy of notebooks in git; instead, the docs build checks out the requested git ref and builds the site from that snapshot. So:</p>
-<ul>
-<li><strong><code>/stable/</code></strong> in the deployed site shows notebooks <strong>as they were at the release tag</strong> (e.g. <code>v0.0.1</code>).</li>
-<li><strong><code>/latest/</code></strong> shows notebooks <strong>as they are on <code>main</code> today</strong> (e.g. updated <code>predict_times</code> / <code>f_observations</code> conventions).</li>
-</ul>
-<p>If you follow a notebook locally, align your install with the doc version you are reading (<strong>stable</strong> vs <strong>latest</strong>).</p>
-<h3 id="optional-banner-cell-for-authors">Optional: banner cell for authors<a class="headerlink" href="#optional-banner-cell-for-authors" title="Permanent link">&para;</a></h3>
-<p>When adding or updating a notebook, you can paste a short markdown cell at the top so readers know which branch the source matches:</p>
-<div class="highlight"><pre><span></span><code><span class="k">&gt; </span><span class="ge">**Source:** This notebook tracks **`main`**. Published HTML for **`stable`** (releases) and **`latest`** (dev) may differ; use the docs **version menu** and install the matching package (see [Versioned documentation](versioning.md)).</span>
-</code></pre></div>
-<p>For notebooks that are <strong>only</strong> meant for a specific release, prefer <strong>tagging</strong> and building docs from that tag rather than maintaining duplicate files.</p>
-<h2 id="local-builds-maintainers">Local builds (maintainers)<a class="headerlink" href="#local-builds-maintainers" title="Permanent link">&para;</a></h2>
-<p>For normal docs work:</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--dev<span class="w"> </span>--all-extras
-uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>build
-uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve
-</code></pre></div>
-<p>If you want to verify the <strong>versioned</strong> layout locally, especially <strong><code>stable</code></strong> vs <strong><code>latest</code></strong>, use the helper script:</p>
-<div class="highlight"><pre><span></span><code>scripts/preview_versioned_docs.sh<span class="w"> </span>v0.0.1
-</code></pre></div>
-<p>That will:</p>
-<ul>
-<li>create / reuse sibling worktrees under <code>../dynestyx-docs-preview/</code></li>
-<li>build <strong><code>stable</code></strong> from the supplied ref / tag</li>
-<li>build <strong><code>latest</code></strong> from <code>main</code></li>
-<li>set the local default to <strong><code>stable</code></strong></li>
-<li>serve the combined Mike site at <code>http://127.0.0.1:8000</code></li>
-</ul>
-<p>Open <code>http://127.0.0.1:8000</code> and use the version switcher to compare <strong><code>stable (0.0.1)</code></strong> and <strong><code>latest</code></strong>.</p>
-<p>Optional arguments:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># default latest ref is main</span>
-scripts/preview_versioned_docs.sh<span class="w"> </span>v0.0.1
+<h1 id="model-checkers">Model checkers<a class="headerlink" href="#model-checkers" title="Permanent link">&para;</a></h1>
+<p>Validation and shape-inference helpers for <a href="../../../public/models/core/dynamical_model/"><code>DynamicalModel</code></a> construction and checks.</p>
 
-<span class="c1"># compare the release against your current feature branch</span>
-scripts/preview_versioned_docs.sh<span class="w"> </span>v0.0.1<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>git<span class="w"> </span>branch<span class="w"> </span>--show-current<span class="k">)</span><span class="s2">&quot;</span>
 
-<span class="c1"># use a different &quot;latest&quot; ref</span>
-scripts/preview_versioned_docs.sh<span class="w"> </span>v0.0.1<span class="w"> </span>my-feature-branch
+<div class="doc doc-object doc-module">
 
-<span class="c1"># change the local port</span>
-<span class="nv">PORT</span><span class="o">=</span><span class="m">9000</span><span class="w"> </span>scripts/preview_versioned_docs.sh<span class="w"> </span>v0.0.1
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Why <code>uv run --with mike</code>?</p>
-<p>Older tags may not list <code>mike</code> in their <code>pyproject.toml</code>. Using <code>uv run --with mike mike ...</code> ensures the command is available even when you check out a historical release.</p>
+
+
+<a id="dynestyx.models.checkers"></a>
+    <div class="doc doc-contents first">
+
+        <p>Validation and shape-inference helpers for dynamical models.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._infer_observation_dim_in_plate_context" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_infer_observation_dim_in_plate_context</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">observation_model</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; state_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; control_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]],</span> <span class="n">Any</span><span class="p">],</span> <span class="n">x_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; state_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">u_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; control_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">t_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">observation_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
+
+<a href="#dynestyx.models.checkers._infer_observation_dim_in_plate_context" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Infer observation dimension in plate context, falling back to explicit value.</p>
+
+
+    </div>
+
 </div>
-<p><strong>Do not</strong> force-push to <code>gh-pages</code> manually unless you know what you are doing; CI is the source of truth.</p>
-<h2 id="ci">CI<a class="headerlink" href="#ci" title="Permanent link">&para;</a></h2>
-<p>Deployment is defined in <code>.github/workflows/build_docs.yml</code>:</p>
-<ul>
-<li>Push to <strong><code>main</code></strong> → Mike version <code>dev</code>, alias <strong><code>latest</code></strong>, title <strong><code>latest</code></strong>.</li>
-<li>Push <strong><code>v*</code></strong> tag → Mike version <code>&lt;semver&gt;</code>, alias <strong><code>stable</code></strong>, title <strong><code>stable (&lt;semver&gt;)</code></strong>, then <code>mike set-default stable</code> so the site root tracks the newest release.</li>
-</ul>
-<h3 id="manual-publish-backfill-workflow_dispatch">Manual publish / backfill (<code>workflow_dispatch</code>)<a class="headerlink" href="#manual-publish-backfill-workflow_dispatch" title="Permanent link">&para;</a></h3>
-<p>Use <strong>Actions → Build docs → Run workflow</strong> when you want to publish docs from an arbitrary git ref without creating a new tag.</p>
-<p>This is especially useful for your already-existing historical release tag.</p>
-<div class="admonition note">
-<p class="admonition-title">Manual preview inputs</p>
-<p>In Mike, the <strong>version id</strong> and an <strong>alias</strong> cannot be the same string in the same deploy command. For a one-off preview, use distinct values such as:</p>
-<ul>
-<li><strong>version:</strong> <code>manual-preview-build</code></li>
-<li><strong>alias:</strong> <code>manual-preview</code></li>
-</ul>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._infer_vector_dim_from_distribution" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_infer_vector_dim_from_distribution</span><span class="p">(</span><span class="n">distribution</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">allow_batch_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
+
+<a href="#dynestyx.models.checkers._infer_vector_dim_from_distribution" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Infer scalar/vector event dimension from a NumPyro-compatible distribution.</p>
+<p>When <code>allow_batch_shape</code> is true, leading batch dimensions are ignored and
+only the distribution event shape is used. This is needed inside
+<code>dsx.plate</code> where a vector-valued state distribution can have shape
+<code>(plate_size, state_dim)</code> but still represents a <code>state_dim</code> event.</p>
+<p>Note: Name is used only for error messages.</p>
+
+
+    </div>
+
 </div>
-<p>Example: backfill <strong><code>stable</code></strong> from the existing tag <strong><code>v0.0.1</code></strong>:</p>
-<ul>
-<li><strong>target ref:</strong> <code>v0.0.1</code></li>
-<li><strong>version:</strong> <code>0.0.1</code></li>
-<li><strong>alias:</strong> <code>stable</code></li>
-<li><strong>title:</strong> <code>stable (0.0.1)</code></li>
-<li><strong>set default:</strong> <code>true</code></li>
-</ul>
-<p>That publishes the tagged docs as <strong><code>stable</code></strong> using the <strong>current</strong> docs workflow and toolchain, and the menu entry will read <strong><code>stable (0.0.1)</code></strong>.</p>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._inside_numpyro_plate_context" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_inside_numpyro_plate_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+
+<a href="#dynestyx.models.checkers._inside_numpyro_plate_context" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return True when currently executing inside any active numpyro.plate frame.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._is_categorical_distribution" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_is_categorical_distribution</span><span class="p">(</span><span class="n">distribution</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+
+<a href="#dynestyx.models.checkers._is_categorical_distribution" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return True for class-label categorical distributions.</p>
+<p>This intentionally excludes one-hot categorical variants because the model
+logic here assumes scalar integer latent states.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._make_probe_state" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_make_probe_state</span><span class="p">(</span><span class="n">initial_condition</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">state_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; state_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span></code>
+
+<a href="#dynestyx.models.checkers._make_probe_state" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build a synthetic state value used for shape-check probes.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._unwrap_base_distribution" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_unwrap_base_distribution</span><span class="p">(</span><span class="n">distribution</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span></code>
+
+<a href="#dynestyx.models.checkers._unwrap_base_distribution" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Peel common NumPyro wrapper distributions to inspect the base distribution.</p>
+<p>NumPyro often wraps scalar/vector distributions in containers like
+<code>Independent</code>, <code>ExpandedDistribution</code>, or <code>MaskedDistribution</code>. For shape and
+categorical checks we want to reason about the base distribution semantics.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._validate_categorical_state" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_validate_categorical_state</span><span class="p">(</span><span class="n">categorical_state</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inferred_categorical_state</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#dynestyx.models.checkers._validate_categorical_state" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Ensure optional categorical_state agrees with inferred initial condition type.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._validate_continuous_state_evolution" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_validate_continuous_state_evolution</span><span class="p">(</span><span class="n">state_evolution</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">state_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">x_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; state_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">u_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; control_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">t_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#dynestyx.models.checkers._validate_continuous_state_evolution" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Validate the drift shape of a continuous-time state evolution.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._validate_continuous_time_flag" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_validate_continuous_time_flag</span><span class="p">(</span><span class="n">continuous_time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inferred_continuous_time</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#dynestyx.models.checkers._validate_continuous_time_flag" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Ensure optional continuous_time agrees with inferred model type.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._validate_discrete_state_evolution_output_shape" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_validate_discrete_state_evolution_output_shape</span><span class="p">(</span><span class="n">state_evolution</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">state_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">x_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; state_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">u_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39; control_dim&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">t_probe</span><span class="p">:</span> <span class="n">Real</span><span class="p">[</span><span class="n">Array</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#dynestyx.models.checkers._validate_discrete_state_evolution_output_shape" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Validate a discrete-time state evolution against the inferred state dimension.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._validate_observation_dim" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_validate_observation_dim</span><span class="p">(</span><span class="n">observation_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inferred_observation_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#dynestyx.models.checkers._validate_observation_dim" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Ensure optional observation_dim agrees with inferred observation shape.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="dynestyx.models.checkers._validate_state_dim" class="doc doc-heading">
+            <code class=" language-python"><span class="n">_validate_state_dim</span><span class="p">(</span><span class="n">state_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">inferred_state_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+<a href="#dynestyx.models.checkers._validate_state_dim" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Ensure optional state_dim agrees with inferred initial condition shape.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
 
 
 
@@ -3730,12 +4415,12 @@ scripts/preview_versioned_docs.sh<span class="w"> </span>v0.0.1<span class="w"> 
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.footnote.tooltips", "navigation.instant", "navigation.sections", "navigation.tabs", "navigation.top", "search.highlight", "search.share", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["content.footnote.tooltips", "navigation.instant", "navigation.sections", "navigation.tabs", "navigation.top", "search.highlight", "search.share", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../javascripts/mathjax.js"></script>
+        <script src="../../../../javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
