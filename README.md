@@ -8,6 +8,16 @@
 
 To get started, you can [read the documentation](https://basisresearch.github.io/dynestyx) (version menu: **stable** = latest release, **latest** = `main`) or go straight to the [quickstart](https://basisresearch.github.io/dynestyx/stable/tutorials/quickstart/).
 
+> ## 🤖 AI-coded factorial-SSM extension
+>
+> This fork is an **AI-coded extension of [Dynestyx](https://github.com/BasisResearch/dynestyx)** that adds first-class support for **factorial state-space models** (fSSMs), designed as a `dynestyx`-based counterpart to [`cuthberto-carlos`](https://github.com/state-space-models/cuthberto-carlos) — the football demo built on [`cuthbert`](https://github.com/state-space-models/cuthbert).
+>
+> A factorial SSM treats a large collection of conditionally-independent *factors* (e.g. players or teams), each with its own Markov skill dynamics, observed only through *local* — typically pairwise — comparisons (e.g. one match between two teams). This extension makes that a first-class [`FactorialDynamicalModel`](dynestyx/models/factorial.py) and wraps `cuthbert`'s factor-marginalized filtering/smoothing backends (EKF, KF, and particle filter) behind dynestyx's unified `DynamicalModel` + `dsx.sample()` API, so the same model code runs under any inference method.
+>
+> It also adds a **bivariate-Poisson scoreline observation** (attack/defense skills, à la Karlis–Ntzoufras / Dixon–Coles), a [`dynestyx.contrib`](dynestyx/contrib/) helper for held-out one-step-ahead predictive evaluation, and deep-dive notebooks that forecast the **2026 World Cup** and **reproduce the online skill-rating results of [Duffield et al. (2024)](https://doi.org/10.1093/jrsssc/qlae035)** (their package [`abile`](https://github.com/SamDuffield/abile)) on tennis, chess, and football data.
+>
+> **Deep dives:** [World Cup](docs/deep_dives/factorial_world_cup.ipynb) · [Duffield — tennis](docs/deep_dives/duffield_tennis_wta.ipynb) · [Duffield — chess](docs/deep_dives/duffield_chess.ipynb) · [Duffield — football](docs/deep_dives/duffield_football_epl.ipynb)
+
 ## Goals of `dynestyx`
 
 The goal of `dynestyx` is to decouple model code and inference code for dynamical systems, a common theme in *probabilistic programming languages* like [NumPyro](https://num.pyro.ai/en/stable/). The benefits of this are two-fold: modellers get an interface that is simple to use, with access to advanced inference methods for free. Methods researchers simultaneously get a platform where their methodologies can be immediately used, with a natural testbed of problems to evaluate performance on.
