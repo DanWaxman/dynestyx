@@ -19,6 +19,8 @@ from dynestyx.inference.smoother_configs import (
 )
 from dynestyx.inference.smoothers import Smoother
 from dynestyx.models import (
+    BivariatePoisson,
+    BivariatePoissonScoreObservation,
     ContinuousTimeStateEvolution,
     DeterministicContinuousTimeStateEvolution,
     DiagonalDiffusion,
@@ -40,6 +42,7 @@ from dynestyx.models import (
     ScalarDiffusion,
     StochasticContinuousTimeStateEvolution,
     factorial_outcome_probabilities,
+    factorial_score_probabilities,
 )
 from dynestyx.simulators import (
     DiscreteTimeSimulator,
@@ -63,7 +66,10 @@ __all__ = [
     "FactorialDynamicalModel",
     "RandomWalkEvolution",
     "MatchOutcomeObservation",
+    "BivariatePoisson",
+    "BivariatePoissonScoreObservation",
     "factorial_outcome_probabilities",
+    "factorial_score_probabilities",
     "FactorialEKFConfig",
     "FactorialKFConfig",
     "FactorialPFConfig",

@@ -57,6 +57,7 @@ from dynestyx.models.core import (
     ObservationModelLike,
     StateEvolutionLike,
 )
+from dynestyx.models.distributions import BivariatePoisson
 from dynestyx.types import as_scalar_time_array
 
 
@@ -196,6 +197,96 @@ class MatchOutcomeObservation(ObservationModel):
         probs = jnp.clip(probs, 1e-7, 1.0)
         probs = probs / jnp.sum(probs)
         return dist.Categorical(probs=probs)
+
+
+class BivariatePoissonScoreObservation(ObservationModel):
+    r"""Bivariate-Poisson scoreline observation from attack/defense skills.
+
+    Acts on the joint-local state of the two involved factors, a length-``4`` vector
+    ``[att_i, def_i, att_j, def_j]`` (home ``i`` then away ``j``, each with a 2-D
+    attack/defense state). It returns a :class:`~dynestyx.models.distributions.BivariatePoisson`
+    over the scoreline ``(home_goals, away_goals)`` with rates (Duffield et al. §4.6,
+    Karlis & Ntzoufras):
+
+    $$
+    \lambda_1 = \exp(\alpha + h + x^{\mathrm{att},i} - x^{\mathrm{def},j}),\quad
+    \lambda_2 = \exp(\alpha + x^{\mathrm{att},j} - x^{\mathrm{def},i}),\quad
+    \lambda_3 = \exp(\beta),
+    $$
+
+    where $\alpha$ is the baseline log scoring rate, $\beta$ the log shared-goals
+    correlation rate, and $h$ an optional additive home advantage on the home team's
+    scoring rate.
+
+    Note:
+        As with :class:`MatchOutcomeObservation`, the EKF (Taylor) factorial filter
+        is **forward-only** for this observation: the score potential depends on the
+        4-D state only through the two contrasts ``att_i - def_j`` and
+        ``att_j - def_i``, so its linearized Hessian is rank-deficient and the
+        marginal log-likelihood is not differentiable through the EKF. Use the EKF for
+        filtering/smoothing/prediction and ``FactorialPFConfig`` (particle filter) for
+        gradient-based parameter inference.
+
+    Attributes:
+        alpha (jax.Array): Baseline log scoring rate $\alpha$.
+        beta (jax.Array): Log shared-goals correlation rate $\beta$ ($\lambda_3 = e^\beta$).
+        home_advantage (jax.Array): Additive home-team log-rate shift $h$ (default 0).
+        num_local_factors (int): Factors per observation; must be ``2`` (pairwise).
+        factor_state_dim (int): Per-factor state dimension; must be ``2`` (attack, defense).
+        max_goals (int): Convolution-sum cap of the bivariate Poisson (default ``12``).
+    """
+
+    alpha: Float[Array, ""]
+    beta: Float[Array, ""]
+    home_advantage: Float[Array, ""]
+    num_local_factors: int = eqx.field(static=True)
+    factor_state_dim: int = eqx.field(static=True)
+    max_goals: int = eqx.field(static=True)
+
+    def __init__(
+        self,
+        alpha: float | int | Float[Array, ""] = 0.0,
+        beta: float | int | Float[Array, ""] = -1.5,
+        home_advantage: float | int | Float[Array, ""] = 0.0,
+        *,
+        num_local_factors: int = 2,
+        factor_state_dim: int = 2,
+        max_goals: int = 12,
+    ):
+        """
+        Args:
+            alpha: Baseline log scoring rate $\\alpha$.
+            beta: Log shared-goals correlation rate $\\beta$.
+            home_advantage: Additive home-team log-rate shift $h$.
+            num_local_factors: Factors per observation (must be ``2``).
+            factor_state_dim: Per-factor state dimension (must be ``2``).
+            max_goals: Convolution-sum cap of the bivariate Poisson.
+        """
+        if int(num_local_factors) != 2:
+            raise ValueError(
+                "BivariatePoissonScoreObservation supports pairwise comparisons only "
+                f"(num_local_factors=2); got {num_local_factors}."
+            )
+        if int(factor_state_dim) != 2:
+            raise ValueError(
+                "BivariatePoissonScoreObservation requires a 2-D attack/defense state "
+                f"(factor_state_dim=2); got {factor_state_dim}."
+            )
+        self.alpha = jnp.asarray(alpha, dtype=float)
+        self.beta = jnp.asarray(beta, dtype=float)
+        self.home_advantage = jnp.asarray(home_advantage, dtype=float)
+        self.num_local_factors = int(num_local_factors)
+        self.factor_state_dim = int(factor_state_dim)
+        self.max_goals = int(max_goals)
+
+    def __call__(self, x, u, t):
+        x = jnp.reshape(x, (self.num_local_factors, self.factor_state_dim))
+        att_i, def_i = x[0, 0], x[0, 1]
+        att_j, def_j = x[1, 0], x[1, 1]
+        lam1 = jnp.exp(self.alpha + self.home_advantage + att_i - def_j)
+        lam2 = jnp.exp(self.alpha + att_j - def_i)
+        lam3 = jnp.exp(self.beta)
+        return BivariatePoisson(lam1, lam2, lam3, max_goals=self.max_goals)
 
 
 class FactorialDynamicalModel(DynamicalModel):
@@ -404,3 +495,74 @@ def factorial_outcome_probabilities(
 
     keys = jax.random.split(key, P)
     return jax.vmap(per_match)(keys, predicted_means, predicted_chol_covs)
+
+
+def factorial_score_probabilities(
+    observation_model: ObservationModelLike,
+    predicted_means: Float[Array, "predict n_local factor_state_dim"],
+    predicted_chol_covs: Float[
+        Array, "predict n_local factor_state_dim factor_state_dim"
+    ],
+    *,
+    key: jax.Array,
+    n_samples: int = 1000,
+    max_goals_grid: int = 6,
+    t: float | int | Real[Array, ""] = 0.0,
+) -> tuple[Float[Array, "predict goals goals"], Float[Array, "predict three"]]:
+    r"""Monte-Carlo predicted scoreline grids and win/draw/loss for future matches.
+
+    For each future match, Monte-Carlo samples the predicted joint-local attack/defense
+    skills $\sim \mathcal N(m, LL^\top)$, evaluates the bivariate-Poisson scoreline PMF
+    over the $(0..G)\times(0..G)$ grid, and averages over the skill samples. The grid
+    is then reduced to win/draw/loss probabilities (home goals on the first axis):
+
+    $$
+    \hat p(\text{score}) = \tfrac{1}{S}\sum_s p_{\mathrm{BP}}(\text{score} \mid x^{(s)}),
+    \quad p(\text{home win}) = \sum_{a>b} \hat p(a, b),\ \text{etc.}
+    $$
+
+    Args:
+        observation_model: A scoreline observation (e.g.
+            :class:`BivariatePoissonScoreObservation`) returning a distribution over the
+            ``(2,)`` scoreline. Its internal ``max_goals`` must be ``>= max_goals_grid``.
+        predicted_means: Predicted per-factor means, shape ``(P, n_local, d)``.
+        predicted_chol_covs: Predicted per-factor covariance Cholesky factors,
+            shape ``(P, n_local, d, d)``.
+        key: PRNG key.
+        n_samples: Number of Monte-Carlo skill samples per match.
+        max_goals_grid: Maximum goals ``G`` shown per team in the score grid.
+        t: Time passed to the observation model (unused by scoreline models).
+
+    Returns:
+        ``(score_grids, win_draw_loss)`` where ``score_grids`` has shape
+        ``(P, G+1, G+1)`` (cell ``[a, b]`` is P(home scores ``a``, away scores ``b``);
+        sums to ~1 up to the ``G`` truncation) and ``win_draw_loss`` has shape ``(P, 3)``
+        as ``[home win, draw, away win]`` rows that sum to 1.
+    """
+    P, n_local, d = predicted_means.shape
+    g = int(max_goals_grid)
+    t_arr = jnp.asarray(t, dtype=float)
+    aa, bb = jnp.meshgrid(jnp.arange(g + 1), jnp.arange(g + 1), indexing="ij")
+    grid_values = jnp.stack([aa.ravel(), bb.ravel()], axis=-1).astype(float)
+
+    def per_match(key_p, mean_p, chol_p):
+        eps = jax.random.normal(key_p, (n_samples, n_local, d))
+        samples = mean_p[None] + jnp.einsum("lij,nlj->nli", chol_p, eps)
+        joint = samples.reshape(n_samples, n_local * d)
+
+        def grid_for_sample(xj):
+            edist = observation_model(xj, None, t_arr)
+            return jnp.exp(edist.log_prob(grid_values))
+
+        grids = jax.vmap(grid_for_sample)(joint)  # (n_samples, (g+1)^2)
+        return jnp.mean(grids, axis=0).reshape(g + 1, g + 1)
+
+    keys = jax.random.split(key, P)
+    score_grids = jax.vmap(per_match)(keys, predicted_means, predicted_chol_covs)
+
+    home_win = jnp.sum(jnp.tril(score_grids, k=-1), axis=(-2, -1))
+    away_win = jnp.sum(jnp.triu(score_grids, k=1), axis=(-2, -1))
+    draw = jnp.sum(jnp.diagonal(score_grids, axis1=-2, axis2=-1), axis=-1)
+    win_draw_loss = jnp.stack([home_win, draw, away_win], axis=-1)
+    win_draw_loss = win_draw_loss / jnp.sum(win_draw_loss, axis=-1, keepdims=True)
+    return score_grids, win_draw_loss

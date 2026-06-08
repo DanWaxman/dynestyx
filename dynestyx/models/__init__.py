@@ -18,11 +18,14 @@ from dynestyx.models.diffusions import (
     FullDiffusion,
     ScalarDiffusion,
 )
+from dynestyx.models.distributions import BivariatePoisson
 from dynestyx.models.factorial import (
+    BivariatePoissonScoreObservation,
     FactorialDynamicalModel,
     MatchOutcomeObservation,
     RandomWalkEvolution,
     factorial_outcome_probabilities,
+    factorial_score_probabilities,
 )
 from dynestyx.models.lti_dynamics import LTI_continuous, LTI_discrete
 from dynestyx.models.observations import (
@@ -44,6 +47,8 @@ __all__ = [
     "Diffusion",
     "DiscreteTimeStateEvolution",
     "DiagonalDiffusion",
+    "BivariatePoisson",
+    "BivariatePoissonScoreObservation",
     "DynamicalModel",
     "Drift",
     "FactorialDynamicalModel",
@@ -56,6 +61,7 @@ __all__ = [
     "ObservationModel",
     "RandomWalkEvolution",
     "factorial_outcome_probabilities",
+    "factorial_score_probabilities",
     "StochasticContinuousTimeStateEvolution",
     "LTI_continuous",
     "LTI_discrete",
