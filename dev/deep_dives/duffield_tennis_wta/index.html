@@ -4849,6 +4849,19 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </style>
 <!-- End of mermaid configuration --><div class="jupyter-wrapper">
 <div class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=be6fa263">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>🤖 AI-coded.</strong> This notebook is part of an <strong>AI-coded extension of <a href="https://github.com/BasisResearch/dynestyx">Dynestyx</a></strong> that adds factorial state-space models (fSSMs) — a <code>dynestyx</code>-based counterpart to <a href="https://github.com/state-space-models/cuthberto-carlos"><code>cuthberto-carlos</code></a>, built on <a href="https://github.com/state-space-models/cuthbert"><code>cuthbert</code></a>. It reproduces the online skill-rating models of <a href="https://doi.org/10.1093/jrsssc/qlae035">Duffield et al. (2024)</a>. See the <a href="https://github.com/DanWaxman/dynestyx">project README</a> for an overview.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2fc20656">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -4857,19 +4870,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="reproducing-duffield-et-al-2024-tennis-wta">Reproducing Duffield et al. (2024) — Tennis (WTA)<a class="anchor-link" href="#reproducing-duffield-et-al-2024-tennis-wta">¶</a></h1><p>This deep dive reproduces the <strong>tennis</strong> results of</p>
 <blockquote>
-<p>Duffield, Power, Wadsworth et al. (2024), <em>A state-space perspective on modelling and
-inference for online skill rating</em>, <strong>JRSS-C 73(5):1262–1282</strong>
-(<a href="https://github.com/SamDuffield/abile">code: <code>SamDuffield/abile</code></a>),</p>
+<p>Duffield, Power, Wadsworth et al. (2024), <em>A state-space perspective on modelling and inference for online skill rating</em>, <strong>JRSS-C 73(5):1262–1282</strong> (<a href="https://github.com/SamDuffield/abile">code: <code>SamDuffield/abile</code></a>),</p>
 </blockquote>
-<p>with dynestyx's factorial state-space model, rating <strong>WTA</strong> players from 2019–2022 match
-results.</p>
-<p><strong>Model.</strong> Each player has a scalar latent skill following a Brownian random walk; a match
-is won by the higher-skilled player with probability $\sigma((x^{\text{winner}}-x^{\text{loser}})/s)$
-— dynestyx <code>MatchOutcomeObservation</code> + <code>RandomWalkEvolution</code>. Tennis has <strong>no draws</strong>, so
-the draw margin $\varepsilon=0$. The headline metric is the held-out one-step-ahead
-predictive NLL of match outcomes (paper Table 2: WTA train <strong>0.635</strong>, test <strong>0.640</strong>).</p>
-<p>Data is public (<a href="http://www.tennis-data.co.uk">tennis-data.co.uk</a>) and downloaded at runtime
-(requires <code>openpyxl</code>).</p>
+<p>with dynestyx's factorial state-space model, rating <strong>WTA</strong> players from 2019–2022 match results.</p>
+<p><strong>Model.</strong> Each player has a scalar latent skill following a Brownian random walk; a match is won by the higher-skilled player with probability $\sigma((x^{\text{winner}}-x^{\text{loser}})/s)$ — dynestyx <code>MatchOutcomeObservation</code> + <code>RandomWalkEvolution</code>. Tennis has <strong>no draws</strong>, so the draw margin $\varepsilon=0$. The headline metric is the held-out one-step-ahead predictive NLL of match outcomes (paper Table 2: WTA train <strong>0.635</strong>, test <strong>0.640</strong>).</p>
+<p>Data is public (<a href="http://www.tennis-data.co.uk">tennis-data.co.uk</a>) and downloaded at runtime (requires <code>openpyxl</code>).</p>
 </div>
 </div>
 </div>
@@ -4935,9 +4940,7 @@ from dynestyx.contrib import outcome_predictive_probs, split_nll</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1-data">1. Data<a class="anchor-link" href="#1-data">¶</a></h2><p>We mirror abile's WTA loader: the winner is listed first (so every outcome is a "home win",
-label <code>1</code>), times are in <strong>days</strong> from the 2018-12-31 origin, and player names are
-normalized (accent-stripped, first-initial) so the same player maps to a single id.</p>
+<h2 id="1-data">1. Data<a class="anchor-link" href="#1-data">¶</a></h2><p>We mirror abile's WTA loader: the winner is listed first (so every outcome is a "home win", label <code>1</code>), times are in <strong>days</strong> from the 2018-12-31 origin, and player names are normalized (accent-stripped, first-initial) so the same player maps to a single id.</p>
 </div>
 </div>
 </div>
@@ -5117,9 +5120,7 @@ print(f"train matches: {test_start}   test matches: {K - test_start}")</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-model-and-duffield-et-als-fitted-parameters">3. Model and Duffield et al.'s fitted parameters<a class="anchor-link" href="#3-model-and-duffield-et-als-fitted-parameters">¶</a></h2><p>Scalar skill, <code>MatchOutcomeObservation(draw_margin=0, scale=1)</code>, random-walk drift rate
-$\tau$ per day. Parameters below are Duffield et al.'s EM/grid fits
-(<code>abile/simulations/tennis_test.py</code>).</p>
+<h2 id="3-model-and-duffield-et-als-fitted-parameters">3. Model and Duffield et al.'s fitted parameters<a class="anchor-link" href="#3-model-and-duffield-et-als-fitted-parameters">¶</a></h2><p>Scalar skill, <code>MatchOutcomeObservation(draw_margin=0, scale=1)</code>, random-walk drift rate $\tau$ per day. Parameters below are Duffield et al.'s EM/grid fits (<code>abile/simulations/tennis_test.py</code>).</p>
 </div>
 </div>
 </div>
@@ -5317,11 +5318,7 @@ pd.DataFrame({
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The <strong>particle filter reproduces the WTA test NLL almost exactly</strong> (0.639 vs Duffield's
-0.640). The EKF is a little higher (~0.68): cuthbert's EKF update convention differs slightly
-from abile's on this rank-deficient, no-draw contrast likelihood, and that small bias is most
-visible for tennis (the particle filter, which makes no such linearization, avoids it). A
-coin-flip baseline would score $-\log 0.5 = 0.693$, so the ratings carry real predictive signal.</p>
+<p>The <strong>particle filter reproduces the WTA test NLL almost exactly</strong> (0.639 vs Duffield's 0.640). The EKF is a little higher (~0.68): cuthbert's EKF update convention differs slightly from abile's on this rank-deficient, no-draw contrast likelihood, and that small bias is most visible for tennis (the particle filter, which makes no such linearization, avoids it). A coin-flip baseline would score $-\log 0.5 = 0.693$, so the ratings carry real predictive signal.</p>
 </div>
 </div>
 </div>
@@ -5332,9 +5329,7 @@ coin-flip baseline would score $-\log 0.5 = 0.693$, so the ratings carry real pr
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5-part-b-fit-tau-sigma_02-independently">5. Part B — fit $(\tau, \sigma_0^2)$ independently<a class="anchor-link" href="#5-part-b-fit-tau-sigma_02-independently">¶</a></h2><p>We select $(\tau, \sigma_0^2)$ with the <strong>particle filter</strong> by minimising the predictive NLL on
-a <strong>validation window</strong> (year 3 of training) — selecting on the training fit alone overfits and
-prefers excessive skill drift. We then report the held-out test NLL.</p>
+<h2 id="5-part-b-fit-tau-sigma_02-independently">5. Part B — fit $(\tau, \sigma_0^2)$ independently<a class="anchor-link" href="#5-part-b-fit-tau-sigma_02-independently">¶</a></h2><p>We select $(\tau, \sigma_0^2)$ with the <strong>particle filter</strong> by minimising the predictive NLL on a <strong>validation window</strong> (year 3 of training) — selecting on the training fit alone overfits and prefers excessive skill drift. We then report the held-out test NLL.</p>
 </div>
 </div>
 </div>
@@ -5644,11 +5639,7 @@ plt.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="7-online-performance-on-held-out-matches">7. Online performance on held-out matches<a class="anchor-link" href="#7-online-performance-on-held-out-matches">¶</a></h2><p>Using the <strong>self-fitted parameters</strong> from Part B, we step through the held-out test period one
-match at a time (each prediction uses only data <em>before</em> that match — genuine online
-operation) and record the model's one-step-ahead forecast. Below, for the most recent matches,
-the probability the model assigned to the <strong>actual</strong> result, coloured green where the model's
-top pick matched the result and red otherwise.</p>
+<h2 id="7-online-performance-on-held-out-matches">7. Online performance on held-out matches<a class="anchor-link" href="#7-online-performance-on-held-out-matches">¶</a></h2><p>Using the <strong>self-fitted parameters</strong> from Part B, we step through the held-out test period one match at a time (each prediction uses only data <em>before</em> that match — genuine online operation) and record the model's one-step-ahead forecast. Below, for the most recent matches, the probability the model assigned to the <strong>actual</strong> result, coloured green where the model's top pick matched the result and red otherwise.</p>
 </div>
 </div>
 </div>
@@ -5745,12 +5736,7 @@ ax.legend(fontsize=8, loc="lower left"); plt.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="8-discussion">8. Discussion<a class="anchor-link" href="#8-discussion">¶</a></h2><p>dynestyx's factorial EKF and particle filter reproduce Duffield et al.'s WTA held-out NLL
-(~0.64) on the same data and model, and an independent grid fit recovers a similar
-$\tau\approx0.014$/day. Tennis is the simplest case (no draws, $\varepsilon=0$); see
-<code>duffield_chess</code> (heavy draws) and <code>duffield_football_epl</code> (draws + a bivariate-Poisson
-scoreline model) for the other sports. Switching <code>FactorialEKFConfig</code> ↔ <code>FactorialPFConfig</code>
-swaps the inference backend with no change to the model.</p>
+<h2 id="8-discussion">8. Discussion<a class="anchor-link" href="#8-discussion">¶</a></h2><p>dynestyx's factorial EKF and particle filter reproduce Duffield et al.'s WTA held-out NLL (~0.64) on the same data and model, and an independent grid fit recovers a similar $\tau\approx0.014$/day. Tennis is the simplest case (no draws, $\varepsilon=0$); see <code>duffield_chess</code> (heavy draws) and <code>duffield_football_epl</code> (draws + a bivariate-Poisson scoreline model) for the other sports. Switching <code>FactorialEKFConfig</code> ↔ <code>FactorialPFConfig</code> swaps the inference backend with no change to the model.</p>
 </div>
 </div>
 </div>

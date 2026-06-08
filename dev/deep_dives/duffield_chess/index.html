@@ -4849,6 +4849,19 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </style>
 <!-- End of mermaid configuration --><div class="jupyter-wrapper">
 <div class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9794911b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>🤖 AI-coded.</strong> This notebook is part of an <strong>AI-coded extension of <a href="https://github.com/BasisResearch/dynestyx">Dynestyx</a></strong> that adds factorial state-space models (fSSMs) — a <code>dynestyx</code>-based counterpart to <a href="https://github.com/state-space-models/cuthberto-carlos"><code>cuthberto-carlos</code></a>, built on <a href="https://github.com/state-space-models/cuthbert"><code>cuthbert</code></a>. It reproduces the online skill-rating models of <a href="https://doi.org/10.1093/jrsssc/qlae035">Duffield et al. (2024)</a>. See the <a href="https://github.com/DanWaxman/dynestyx">project README</a> for an overview.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5a90889e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -4857,21 +4870,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="reproducing-duffield-et-al-2024-chess">Reproducing Duffield et al. (2024) — Chess<a class="anchor-link" href="#reproducing-duffield-et-al-2024-chess">¶</a></h1><p>This deep dive reproduces the <strong>chess</strong> results of</p>
 <blockquote>
-<p>Duffield, Power, Wadsworth et al. (2024), <em>A state-space perspective on modelling and
-inference for online skill rating</em>, <strong>JRSS-C 73(5):1262–1282</strong>
-(<a href="https://github.com/SamDuffield/abile">code: <code>SamDuffield/abile</code></a>),</p>
+<p>Duffield, Power, Wadsworth et al. (2024), <em>A state-space perspective on modelling and inference for online skill rating</em>, <strong>JRSS-C 73(5):1262–1282</strong> (<a href="https://github.com/SamDuffield/abile">code: <code>SamDuffield/abile</code></a>),</p>
 </blockquote>
-<p>using dynestyx's factorial state-space model. We rate the world's top chess players from
-<strong>Candidates-cycle games (2016–2019)</strong> treated as an online skill-rating problem.</p>
-<p><strong>Model.</strong> Each player has a scalar latent <em>skill</em> that follows a Brownian random walk; a
-game's outcome (white win / draw / black win) is a sigmoidal function of the skill
-difference with a draw margin $\varepsilon$ — exactly the dynestyx
-<code>MatchOutcomeObservation</code> + <code>RandomWalkEvolution</code>, i.e. Duffield et al.'s "Elo–Davidson as
-a state-space model". Filtering with the factor-marginalized EKF / particle filter gives
-online ratings; the headline metric is the <strong>held-out one-step-ahead predictive NLL</strong> of
-match outcomes (paper Table 2: chess train <strong>0.801</strong>, test <strong>0.972</strong>).</p>
-<p>Data is public (<a href="https://github.com/huffyhenry/forecasting-candidates">huffyhenry/forecasting-candidates</a>)
-and downloaded at runtime.</p>
+<p>using dynestyx's factorial state-space model. We rate the world's top chess players from <strong>Candidates-cycle games (2016–2019)</strong> treated as an online skill-rating problem.</p>
+<p><strong>Model.</strong> Each player has a scalar latent <em>skill</em> that follows a Brownian random walk; a game's outcome (white win / draw / black win) is a sigmoidal function of the skill difference with a draw margin $\varepsilon$ — exactly the dynestyx <code>MatchOutcomeObservation</code> + <code>RandomWalkEvolution</code>, i.e. Duffield et al.'s "Elo–Davidson as a state-space model". Filtering with the factor-marginalized EKF / particle filter gives online ratings; the headline metric is the <strong>held-out one-step-ahead predictive NLL</strong> of match outcomes (paper Table 2: chess train <strong>0.801</strong>, test <strong>0.972</strong>).</p>
+<p>Data is public (<a href="https://github.com/huffyhenry/forecasting-candidates">huffyhenry/forecasting-candidates</a>) and downloaded at runtime.</p>
 </div>
 </div>
 </div>
@@ -4943,9 +4946,7 @@ from dynestyx.contrib import outcome_predictive_probs, split_nll</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1-data">1. Data<a class="anchor-link" href="#1-data">¶</a></h2><p>We mirror abile's loader: games since the 2015-12-31 origin, with time measured in <strong>days</strong>
-(the unit Duffield et al.'s dynamics rate $\tau$ is expressed in). Outcomes are encoded
-<code>0=draw, 1=white win, 2=black win</code> and the two "factors" per game are <code>[white, black]</code>.</p>
+<h2 id="1-data">1. Data<a class="anchor-link" href="#1-data">¶</a></h2><p>We mirror abile's loader: games since the 2015-12-31 origin, with time measured in <strong>days</strong> (the unit Duffield et al.'s dynamics rate $\tau$ is expressed in). Outcomes are encoded <code>0=draw, 1=white win, 2=black win</code> and the two "factors" per game are <code>[white, black]</code>.</p>
 </div>
 </div>
 </div>
@@ -5034,8 +5035,7 @@ print(f"{K} games, {n_players} players, "
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2-train-test-split">2. Train / test split<a class="anchor-link" href="#2-train-test-split">¶</a></h2><p>Following the paper: the first <strong>3 years</strong> are training and the <strong>subsequent year</strong> is the
-held-out test set.</p>
+<h2 id="2-train-test-split">2. Train / test split<a class="anchor-link" href="#2-train-test-split">¶</a></h2><p>Following the paper: the first <strong>3 years</strong> are training and the <strong>subsequent year</strong> is the held-out test set.</p>
 </div>
 </div>
 </div>
@@ -5088,11 +5088,7 @@ print(f"train games: {test_start}   test games: {K - test_start}")</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-the-dynestyx-model">3. The dynestyx model<a class="anchor-link" href="#3-the-dynestyx-model">¶</a></h2><p><code>MatchOutcomeObservation</code> implements Duffield et al.'s eq. (5):
-$p(\text{white}) = \sigma((\delta-\varepsilon)/s)$, $p(\text{black}) = 1-\sigma((\delta+\varepsilon)/s)$,
-$p(\text{draw})$ the remainder, with skill difference $\delta = x^{\text{white}}-x^{\text{black}}$,
-scale $s=1$ and draw margin $\varepsilon$. The skill evolves as a random walk with rate
-$\tau$ (per day): $\mathrm{Var}$ grows by $\tau^2\,\Delta t$ between games.</p>
+<h2 id="3-the-dynestyx-model">3. The dynestyx model<a class="anchor-link" href="#3-the-dynestyx-model">¶</a></h2><p><code>MatchOutcomeObservation</code> implements Duffield et al.'s eq. (5): $p(\text{white}) = \sigma((\delta-\varepsilon)/s)$, $p(\text{black}) = 1-\sigma((\delta+\varepsilon)/s)$, $p(\text{draw})$ the remainder, with skill difference $\delta = x^{\text{white}}-x^{\text{black}}$, scale $s=1$ and draw margin $\varepsilon$. The skill evolves as a random walk with rate $\tau$ (per day): $\mathrm{Var}$ grows by $\tau^2\,\Delta t$ between games.</p>
 </div>
 </div>
 </div>
@@ -5174,11 +5170,7 @@ def win_nll(pp, lo, hi):
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4-part-a-reproduce-duffield-et-als-held-out-nll">4. Part A — reproduce Duffield et al.'s held-out NLL<a class="anchor-link" href="#4-part-a-reproduce-duffield-et-als-held-out-nll">¶</a></h2><p>We plug Duffield et al.'s fitted parameters into the dynestyx model and compute the
-one-step-ahead predictive NLL with <code>dynestyx.contrib.outcome_predictive_probs</code> (which
-reconstructs, for every game, each player's filtered skill propagated to the game time and
-integrates the outcome probability — the EKF predictive is computed by exact Gauss–Hermite
-quadrature). We run both the <strong>factor-marginalized EKF</strong> and the <strong>particle filter (SMC)</strong>.</p>
+<h2 id="4-part-a-reproduce-duffield-et-als-held-out-nll">4. Part A — reproduce Duffield et al.'s held-out NLL<a class="anchor-link" href="#4-part-a-reproduce-duffield-et-als-held-out-nll">¶</a></h2><p>We plug Duffield et al.'s fitted parameters into the dynestyx model and compute the one-step-ahead predictive NLL with <code>dynestyx.contrib.outcome_predictive_probs</code> (which reconstructs, for every game, each player's filtered skill propagated to the game time and integrates the outcome probability — the EKF predictive is computed by exact Gauss–Hermite quadrature). We run both the <strong>factor-marginalized EKF</strong> and the <strong>particle filter (SMC)</strong>.</p>
 </div>
 </div>
 </div>
@@ -5300,12 +5292,7 @@ comparison.round(3)</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The dynestyx <strong>test</strong> NLLs land right on Duffield et al.'s published numbers (EKF ≈ 0.97–0.99,
-SMC ≈ 0.97). The residual EKF gap (~0.01–0.02) is a difference in the EKF <em>update convention</em>
-— cuthbert uses the standard Laplace/EKF update, abile a slightly different linearization —
-not a modelling difference; we verified the predictive integration itself is exact. A
-baseline that ignored skill entirely (always predicting the empirical 65% draw rate) scores
-well above this, so the ratings are clearly informative.</p>
+<p>The dynestyx <strong>test</strong> NLLs land right on Duffield et al.'s published numbers (EKF ≈ 0.97–0.99, SMC ≈ 0.97). The residual EKF gap (~0.01–0.02) is a difference in the EKF <em>update convention</em> — cuthbert uses the standard Laplace/EKF update, abile a slightly different linearization — not a modelling difference; we verified the predictive integration itself is exact. A baseline that ignored skill entirely (always predicting the empirical 65% draw rate) scores well above this, so the ratings are clearly informative.</p>
 </div>
 </div>
 </div>
@@ -5316,9 +5303,7 @@ well above this, so the ratings are clearly informative.</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5-part-b-fit-the-hyperparameters-independently-with-dynestyx">5. Part B — fit the hyperparameters independently with dynestyx<a class="anchor-link" href="#5-part-b-fit-the-hyperparameters-independently-with-dynestyx">¶</a></h2><p>Rather than reuse Duffield et al.'s EM-fitted values, we re-select $(\tau, \sigma_0^2, \varepsilon)$
-ourselves with the <strong>particle filter</strong> by a coarse grid search, scoring each candidate on a
-<strong>validation window</strong> (year 3 of training), then report the held-out test NLL.</p>
+<h2 id="5-part-b-fit-the-hyperparameters-independently-with-dynestyx">5. Part B — fit the hyperparameters independently with dynestyx<a class="anchor-link" href="#5-part-b-fit-the-hyperparameters-independently-with-dynestyx">¶</a></h2><p>Rather than reuse Duffield et al.'s EM-fitted values, we re-select $(\tau, \sigma_0^2, \varepsilon)$ ourselves with the <strong>particle filter</strong> by a coarse grid search, scoring each candidate on a <strong>validation window</strong> (year 3 of training), then report the held-out test NLL.</p>
 </div>
 </div>
 </div>
@@ -5399,9 +5384,7 @@ Duffield (EM):  init_var=0.025, tau=0.00417, eps=1.08  -&gt; test 0.977
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Independently selecting the hyperparameters recovers values and a test NLL close to
-Duffield et al.'s EM fit — the chess data has a high draw rate, so a large draw margin
-$\varepsilon$ and a small skill-drift rate $\tau$ are preferred, matching the paper.</p>
+<p>Independently selecting the hyperparameters recovers values and a test NLL close to Duffield et al.'s EM fit — the chess data has a high draw rate, so a large draw margin $\varepsilon$ and a small skill-drift rate $\tau$ are preferred, matching the paper.</p>
 </div>
 </div>
 </div>
@@ -5412,8 +5395,7 @@ $\varepsilon$ and a small skill-drift rate $\tau$ are preferred, matching the pa
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="6-ratings-and-skill-trajectories">6. Ratings and skill trajectories<a class="anchor-link" href="#6-ratings-and-skill-trajectories">¶</a></h2><p>Filtering produces an online skill estimate for every player after every game. Below we rank
-players by their final filtered skill and plot a few notable trajectories.</p>
+<h2 id="6-ratings-and-skill-trajectories">6. Ratings and skill trajectories<a class="anchor-link" href="#6-ratings-and-skill-trajectories">¶</a></h2><p>Filtering produces an online skill estimate for every player after every game. Below we rank players by their final filtered skill and plot a few notable trajectories.</p>
 </div>
 </div>
 </div>
@@ -5660,10 +5642,7 @@ plt.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="7-online-performance-on-held-out-matches">7. Online performance on held-out matches<a class="anchor-link" href="#7-online-performance-on-held-out-matches">¶</a></h2><p>Using the <strong>self-fitted parameters</strong> from Part B, we replay the held-out test period one game
-at a time (each forecast uses only earlier games — genuine online operation). Below, for the
-most recent games, the probability the model assigned to the <strong>actual</strong> result, coloured green
-where the model's top pick (most-likely of white-win / draw / black-win) matched the result.</p>
+<h2 id="7-online-performance-on-held-out-matches">7. Online performance on held-out matches<a class="anchor-link" href="#7-online-performance-on-held-out-matches">¶</a></h2><p>Using the <strong>self-fitted parameters</strong> from Part B, we replay the held-out test period one game at a time (each forecast uses only earlier games — genuine online operation). Below, for the most recent games, the probability the model assigned to the <strong>actual</strong> result, coloured green where the model's top pick (most-likely of white-win / draw / black-win) matched the result.</p>
 </div>
 </div>
 </div>
@@ -5761,22 +5740,12 @@ ax.legend(fontsize=8, loc="lower left"); plt.tight_layout(); plt.show()</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="8-discussion">8. Discussion<a class="anchor-link" href="#8-discussion">¶</a></h2><ul>
-<li><strong>Reproduction.</strong> dynestyx's factorial EKF and particle filter reproduce Duffield et al.'s
-held-out chess NLL to within ~0.01–0.02 nats on the same data, using the same model
-(<code>MatchOutcomeObservation</code> = their Elo–Davidson SSM). The small EKF gap is the
-Laplace-update convention, not the model.</li>
-<li><strong>Method, not just numbers.</strong> The dynestyx code is fully inference-agnostic: switching
-<code>FactorialEKFConfig</code> ↔ <code>FactorialPFConfig</code> swaps the EKF for a particle filter with no
-change to the model, and <code>dynestyx.contrib</code> turns the filter into held-out predictive NLL.</li>
-<li><strong>Chess specifics.</strong> The 65% draw rate forces a large draw margin $\varepsilon$; skills
-drift slowly. See the companion <code>duffield_tennis_wta</code> (no draws) and
-<code>duffield_football_epl</code> (draws + a richer bivariate-Poisson scoreline model) notebooks.</li>
+<li><strong>Reproduction.</strong> dynestyx's factorial EKF and particle filter reproduce Duffield et al.'s held-out chess NLL to within ~0.01–0.02 nats on the same data, using the same model (<code>MatchOutcomeObservation</code> = their Elo–Davidson SSM). The small EKF gap is the Laplace-update convention, not the model.</li>
+<li><strong>Method, not just numbers.</strong> The dynestyx code is fully inference-agnostic: switching <code>FactorialEKFConfig</code> ↔ <code>FactorialPFConfig</code> swaps the EKF for a particle filter with no change to the model, and <code>dynestyx.contrib</code> turns the filter into held-out predictive NLL.</li>
+<li><strong>Chess specifics.</strong> The 65% draw rate forces a large draw margin $\varepsilon$; skills drift slowly. See the companion <code>duffield_tennis_wta</code> (no draws) and <code>duffield_football_epl</code> (draws + a richer bivariate-Poisson scoreline model) notebooks.</li>
 </ul>
 <blockquote>
-<p><strong>Note on the factored approximation.</strong> The factor-marginalized filter is <em>exact</em> on
-loop-free schedules and a tight approximation on cyclic ones (validated separately in the
-test suite); round-robin-heavy chess data is mildly cyclic, well within the regime where
-the approximation is accurate.</p>
+<p><strong>Note on the factored approximation.</strong> The factor-marginalized filter is <em>exact</em> on loop-free schedules and a tight approximation on cyclic ones (validated separately in the test suite); round-robin-heavy chess data is mildly cyclic, well within the regime where the approximation is accurate.</p>
 </blockquote>
 </div>
 </div>

@@ -4888,26 +4888,27 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </style>
 <!-- End of mermaid configuration --><div class="jupyter-wrapper">
 <div class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7a921c5d">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>🤖 AI-coded.</strong> This notebook is part of an <strong>AI-coded extension of <a href="https://github.com/BasisResearch/dynestyx">Dynestyx</a></strong> that adds factorial state-space models (fSSMs) — a <code>dynestyx</code>-based counterpart to <a href="https://github.com/state-space-models/cuthberto-carlos"><code>cuthberto-carlos</code></a>, built on <a href="https://github.com/state-space-models/cuthbert"><code>cuthbert</code></a>. It reproduces the online skill-rating models of <a href="https://doi.org/10.1093/jrsssc/qlae035">Duffield et al. (2024)</a>. See the <a href="https://github.com/DanWaxman/dynestyx">project README</a> for an overview.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fe98c268">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="attackdefense-bivariate-poisson-models-for-world-cup-scores">Attack/defense bivariate-Poisson models for World Cup scores<a class="anchor-link" href="#attackdefense-bivariate-poisson-models-for-world-cup-scores">¶</a></h1><p><strong>Deep dive.</strong> This notebook builds a <em>factorial state-space model</em> (fSSM) of
-international football that predicts <strong>scorelines</strong> for the 2026 FIFA World Cup,
-following the <a href="https://github.com/state-space-models/cuthberto-carlos"><code>cuthberto-carlos</code></a>
-formulation. It extends the win/draw/loss skill model with a richer
-<strong>attack/defense</strong> state and a <strong>bivariate Poisson</strong> goal likelihood, estimates
-<strong>all</strong> hyperparameters by gradient ascent on the differentiable particle-filter
-marginal likelihood, evaluates the fitted model <strong>online</strong>, and compares the
-gradient-MLE parameters against a full <strong>NUTS</strong> posterior and the <strong>Duffield et al.</strong>
-values.</p>
-<p>Each team carries a <em>two-dimensional</em> latent skill — attacking and defensive
-strength — that evolves as Brownian motion, and a match's scoreline is modelled
-with the bivariate Poisson distribution of
-<a href="https://doi.org/10.1111/1467-9884.00366">Karlis &amp; Ntzoufras (2003)</a> (Duffield et al.
-2024, §4.6):</p>
+<h1 id="attackdefense-bivariate-poisson-models-for-world-cup-scores">Attack/defense bivariate-Poisson models for World Cup scores<a class="anchor-link" href="#attackdefense-bivariate-poisson-models-for-world-cup-scores">¶</a></h1><p><strong>Deep dive.</strong> This notebook builds a <em>factorial state-space model</em> (fSSM) of international football that predicts <strong>scorelines</strong> for the 2026 FIFA World Cup, following the <a href="https://github.com/state-space-models/cuthberto-carlos"><code>cuthberto-carlos</code></a> formulation. It extends the win/draw/loss skill model with a richer <strong>attack/defense</strong> state and a <strong>bivariate Poisson</strong> goal likelihood, estimates <strong>all</strong> hyperparameters by gradient ascent on the differentiable particle-filter marginal likelihood, evaluates the fitted model <strong>online</strong>, and compares the gradient-MLE parameters against a full <strong>NUTS</strong> posterior and the <strong>Duffield et al.</strong> values.</p>
+<p>Each team carries a <em>two-dimensional</em> latent skill — attacking and defensive strength — that evolves as Brownian motion, and a match's scoreline is modelled with the bivariate Poisson distribution of <a href="https://doi.org/10.1111/1467-9884.00366">Karlis &amp; Ntzoufras (2003)</a> (Duffield et al. 2024, §4.6):</p>
 <p>$$
 \begin{aligned}
 p(x^i_0) &amp;= \mathrm N(\mu_0, \Sigma_0), &amp;
@@ -4921,10 +4922,7 @@ $$</p>
 \lambda_2 = e^{\alpha + x^{\mathrm{att},j} - x^{\mathrm{def},i}},\quad
 \lambda_3 = e^{\beta}.
 $$</p>
-<p>The static hyperparameters are $\theta = \{\mu_0 \in \mathbb R^2,\ \Sigma_0 \in
-\mathbb R^{2\times2},\ \tau \in \mathbb R^2_{&gt;0},\ \alpha,\ \beta\}$. We reuse the same
-<code>FactorialDynamicalModel</code> + <code>dsx.sample</code> machinery as the scalar model — only the
-per-factor state dimension (<code>2</code>) and the observation model change.</p>
+<p>The static hyperparameters are $\theta = \{\mu_0 \in \mathbb R^2,\ \Sigma_0 \in \mathbb R^{2\times2},\ \tau \in \mathbb R^2_{&gt;0},\ \alpha,\ \beta\}$. We reuse the same <code>FactorialDynamicalModel</code> + <code>dsx.sample</code> machinery as the scalar model — only the per-factor state dimension (<code>2</code>) and the observation model change.</p>
 </div>
 </div>
 </div>
@@ -5016,11 +5014,7 @@ jax.config.update("jax_enable_x64", True)</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1-data-scorelines-and-the-2026-world-cup-fixtures">1. Data: scorelines and the 2026 World Cup fixtures<a class="anchor-link" href="#1-data-scorelines-and-the-2026-world-cup-fixtures">¶</a></h2><p>We download Mart Jürisoo's open
-<a href="https://github.com/martj42/international_results"><code>international_results</code></a> dataset at
-runtime; it already contains the <strong>2026 World Cup fixtures</strong> as future rows with
-missing scores. We focus on the 48 World Cup teams and their head-to-head matches
-since 2015; the observations are the <strong>scorelines</strong> <code>(home_goals, away_goals)</code>.</p>
+<h2 id="1-data-scorelines-and-the-2026-world-cup-fixtures">1. Data: scorelines and the 2026 World Cup fixtures<a class="anchor-link" href="#1-data-scorelines-and-the-2026-world-cup-fixtures">¶</a></h2><p>We download Mart Jürisoo's open <a href="https://github.com/martj42/international_results"><code>international_results</code></a> dataset at runtime; it already contains the <strong>2026 World Cup fixtures</strong> as future rows with missing scores. We focus on the 48 World Cup teams and their head-to-head matches since 2015; the observations are the <strong>scorelines</strong> <code>(home_goals, away_goals)</code>.</p>
 </div>
 </div>
 </div>
@@ -5151,10 +5145,7 @@ print(f"{F} teams, {K} historical scorelines, {len(future)} World Cup fixtures t
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2-the-bivariate-poisson-factorial-model">2. The bivariate-Poisson factorial model<a class="anchor-link" href="#2-the-bivariate-poisson-factorial-model">¶</a></h2><p>The per-factor state is 2-D <code>(attack, defense)</code>. We parameterise the hyperparameters
-in an <em>unconstrained</em> space for gradient-based optimisation: $\Sigma_0 = LL^\top$ via
-a lower-Cholesky factor $L$ (positive diagonal through $\exp$), and $\tau =
-\exp(\cdot)$. <code>make_model</code> turns a parameter pytree into a <code>FactorialDynamicalModel</code>.</p>
+<h2 id="2-the-bivariate-poisson-factorial-model">2. The bivariate-Poisson factorial model<a class="anchor-link" href="#2-the-bivariate-poisson-factorial-model">¶</a></h2><p>The per-factor state is 2-D <code>(attack, defense)</code>. We parameterise the hyperparameters in an <em>unconstrained</em> space for gradient-based optimisation: $\Sigma_0 = LL^\top$ via a lower-Cholesky factor $L$ (positive diagonal through $\exp$), and $\tau = \exp(\cdot)$. <code>make_model</code> turns a parameter pytree into a <code>FactorialDynamicalModel</code>.</p>
 </div>
 </div>
 </div>
@@ -5260,16 +5251,8 @@ init_params = {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-estimating-all-hyperparameters-pf-marginal-likelihood-gradient-ascent">3. Estimating all hyperparameters: PF marginal likelihood + gradient ascent<a class="anchor-link" href="#3-estimating-all-hyperparameters-pf-marginal-likelihood-gradient-ascent">¶</a></h2><p>We fit $\theta$ by maximising the marginal likelihood $\log p(y_{1:K} \mid \theta)$.
-The factorial <em>EKF</em> evidence is a Laplace approximation that is not differentiable
-through the linearised categorical update, but the factorial <strong>particle filter</strong>
-gives a differentiable estimate (stop-gradient resampling, Ścibior &amp; Wood 2021). So
-we minimise the negative PF marginal log-likelihood with Adam, using a <strong>fixed PRNG
-key</strong> (common random numbers) so the objective is a deterministic, smooth function of
-$\theta$.</p>
-<p>A note on identifiability: a match constrains only <em>contrasts</em> (attack minus the
-opponent's defense), so $\mu_0$ and $\alpha$ share a flat direction — the optimiser
-simply settles on that ridge, which does not affect predictions.</p>
+<h2 id="3-estimating-all-hyperparameters-pf-marginal-likelihood-gradient-ascent">3. Estimating all hyperparameters: PF marginal likelihood + gradient ascent<a class="anchor-link" href="#3-estimating-all-hyperparameters-pf-marginal-likelihood-gradient-ascent">¶</a></h2><p>We fit $\theta$ by maximising the marginal likelihood $\log p(y_{1:K} \mid \theta)$. The factorial <em>EKF</em> evidence is a Laplace approximation that is not differentiable through the linearised categorical update, but the factorial <strong>particle filter</strong> gives a differentiable estimate (stop-gradient resampling, Ścibior &amp; Wood 2021). So we minimise the negative PF marginal log-likelihood with Adam, using a <strong>fixed PRNG key</strong> (common random numbers) so the objective is a deterministic, smooth function of $\theta$.</p>
+<p>A note on identifiability: a match constrains only <em>contrasts</em> (attack minus the opponent's defense), so $\mu_0$ and $\alpha$ share a flat direction — the optimiser simply settles on that ridge, which does not affect predictions.</p>
 </div>
 </div>
 </div>
@@ -5491,9 +5474,7 @@ fig.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4-filtering-at-the-learned-parameters-attack-defense-ratings">4. Filtering at the learned parameters: attack &amp; defense ratings<a class="anchor-link" href="#4-filtering-at-the-learned-parameters-attack-defense-ratings">¶</a></h2><p>We run the fast deterministic <strong>EKF</strong> at $\hat\theta$ to obtain each team's current
-2-D skill. Higher attack means more goals scored; higher defense means fewer conceded
-(it enters opponents' rates as $-x^{\mathrm{def}}$), so we rank by attack + defense.</p>
+<h2 id="4-filtering-at-the-learned-parameters-attack-defense-ratings">4. Filtering at the learned parameters: attack &amp; defense ratings<a class="anchor-link" href="#4-filtering-at-the-learned-parameters-attack-defense-ratings">¶</a></h2><p>We run the fast deterministic <strong>EKF</strong> at $\hat\theta$ to obtain each team's current 2-D skill. Higher attack means more goals scored; higher defense means fewer conceded (it enters opponents' rates as $-x^{\mathrm{def}}$), so we rank by attack + defense.</p>
 </div>
 </div>
 </div>
@@ -5806,8 +5787,7 @@ fig.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5-smoothing-attack-defense-trajectories">5. Smoothing: attack &amp; defense trajectories<a class="anchor-link" href="#5-smoothing-attack-defense-trajectories">¶</a></h2><p>Smoothing conditions each estimate on the full history. We plot the smoothed attack
-and defense strengths over time for a few teams (solid = attack, dashed = defense).</p>
+<h2 id="5-smoothing-attack-defense-trajectories">5. Smoothing: attack &amp; defense trajectories<a class="anchor-link" href="#5-smoothing-attack-defense-trajectories">¶</a></h2><p>Smoothing conditions each estimate on the full history. We plot the smoothed attack and defense strengths over time for a few teams (solid = attack, dashed = defense).</p>
 </div>
 </div>
 </div>
@@ -5925,9 +5905,7 @@ ax.legend(ncol=2, fontsize=8); fig.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="6-predicting-world-cup-scorelines">6. Predicting World Cup scorelines<a class="anchor-link" href="#6-predicting-world-cup-scorelines">¶</a></h2><p>For each fixture we propagate the two teams' filtered skills to the match date and
-integrate the bivariate-Poisson likelihood over the predictive skill distribution
-(<code>factorial_score_probabilities</code>), giving a <strong>score grid</strong> and <strong>win/draw/loss</strong>.</p>
+<h2 id="6-predicting-world-cup-scorelines">6. Predicting World Cup scorelines<a class="anchor-link" href="#6-predicting-world-cup-scorelines">¶</a></h2><p>For each fixture we propagate the two teams' filtered skills to the match date and integrate the bivariate-Poisson likelihood over the predictive skill distribution (<code>factorial_score_probabilities</code>), giving a <strong>score grid</strong> and <strong>win/draw/loss</strong>.</p>
 </div>
 </div>
 </div>
@@ -6346,13 +6324,7 @@ plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="7-online-one-step-ahead-performance">7. Online one-step-ahead performance<a class="anchor-link" href="#7-online-one-step-ahead-performance">¶</a></h2><p>How well does a fitted model predict matches <em>before seeing them</em>? We run the EKF
-once over the full history — the filter is <strong>causal</strong> — and exploit the factorial
-<strong>match-sparsity</strong>: a team's state only changes when it plays, so propagating its last
-<em>pre-match</em> filtered skill forward to the match date gives the genuine one-step-ahead
-predictive. We package this as <code>online_eval(model)</code> and visualise the last 20 matches:
-expected vs actual goals for/against the home team, with each column shaded green if
-the outcome was predicted correctly.</p>
+<h2 id="7-online-one-step-ahead-performance">7. Online one-step-ahead performance<a class="anchor-link" href="#7-online-one-step-ahead-performance">¶</a></h2><p>How well does a fitted model predict matches <em>before seeing them</em>? We run the EKF once over the full history — the filter is <strong>causal</strong> — and exploit the factorial <strong>match-sparsity</strong>: a team's state only changes when it plays, so propagating its last <em>pre-match</em> filtered skill forward to the match date gives the genuine one-step-ahead predictive. We package this as <code>online_eval(model)</code> and visualise the last 20 matches: expected vs actual goals for/against the home team, with each column shaded green if the outcome was predicted correctly.</p>
 </div>
 </div>
 </div>
@@ -6542,23 +6514,14 @@ fig.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="8-comparing-parameter-estimation-methods">8. Comparing parameter-estimation methods<a class="anchor-link" href="#8-comparing-parameter-estimation-methods">¶</a></h2><p>The gradient-MLE model predicts <strong>almost the same scoreline for every match</strong> (tiny
-expected-goal spread above): with compressed skills, $x^{\mathrm{att},i} -
-x^{\mathrm{def},j} \approx 0$, so every $\lambda \approx e^\alpha$. Is this a quirk of
-the point optimiser, or what the data really says? We compare three parameter sets on
-the same online task:</p>
+<h2 id="8-comparing-parameter-estimation-methods">8. Comparing parameter-estimation methods<a class="anchor-link" href="#8-comparing-parameter-estimation-methods">¶</a></h2><p>The gradient-MLE model predicts <strong>almost the same scoreline for every match</strong> (tiny expected-goal spread above): with compressed skills, $x^{\mathrm{att},i} - x^{\mathrm{def},j} \approx 0$, so every $\lambda \approx e^\alpha$. Is this a quirk of the point optimiser, or what the data really says? We compare three parameter sets on the same online task:</p>
 <ol>
 <li><strong>gradient MLE</strong> (above);</li>
-<li><strong>NUTS</strong> — the full Bayesian posterior over $\theta$ (we use the posterior mean).
-The PF marginal likelihood is differentiable, so NUTS applies directly;</li>
-<li><strong>Duffield et al.</strong> — the paper's conventions $\mu_0 = 0$, $\Sigma_0 = \tfrac12 I$,
-and a skill-drift $\tau = 0.05$ per $\sqrt{\text{day}}$ (Duffield et al. / cuthbert
-quickstart), with a baseline rate $\alpha = \log(\text{mean goals})$ and a small
-correlation $\beta$.</li>
+<li><strong>NUTS</strong> — the full Bayesian posterior over $\theta$ (we use the posterior mean). The PF marginal likelihood is differentiable, so NUTS applies directly;</li>
+<li><strong>Duffield et al.</strong> — the paper's conventions $\mu_0 = 0$, $\Sigma_0 = \tfrac12 I$, and a skill-drift $\tau = 0.05$ per $\sqrt{\text{day}}$ (Duffield et al. / cuthbert quickstart), with a baseline rate $\alpha = \log(\text{mean goals})$ and a small correlation $\beta$.</li>
 </ol>
 <blockquote>
-<p><strong>Note:</strong> the NUTS cell is the slow part of the notebook (a few minutes) — each
-leapfrog step backpropagates through the 1314-step particle filter.</p>
+<p><strong>Note:</strong> the NUTS cell is the slow part of the notebook (a few minutes) — each leapfrog step backpropagates through the 1314-step particle filter.</p>
 </blockquote>
 </div>
 </div>
@@ -6934,22 +6897,13 @@ fig.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="9-improving-the-model-a-richer-dataset">9. Improving the model: a richer dataset<a class="anchor-link" href="#9-improving-the-model-a-richer-dataset">¶</a></h2><p>The compression above traces to the <strong>data</strong>, not the optimiser. Forty-eight elite,
-evenly-matched teams that meet only occasionally is far sparser than the full-season
-league schedules Duffield et al. used, so maximising the training marginal likelihood
-shrinks the skills toward zero. We test the user-requested levers and a fix:</p>
+<h2 id="9-improving-the-model-a-richer-dataset">9. Improving the model: a richer dataset<a class="anchor-link" href="#9-improving-the-model-a-richer-dataset">¶</a></h2><p>The compression above traces to the <strong>data</strong>, not the optimiser. Forty-eight elite, evenly-matched teams that meet only occasionally is far sparser than the full-season league schedules Duffield et al. used, so maximising the training marginal likelihood shrinks the skills toward zero. We test the user-requested levers and a fix:</p>
 <ul>
-<li><strong>richer data</strong> — give every World Cup team its <em>full</em> schedule (matches vs all
-opponents, not just head-to-head);</li>
-<li><strong>neutral-aware home advantage</strong> and a <strong>friendly flag</strong>, now supported as per-match
-observation controls <code>u = [neutral, friendly]</code>;</li>
+<li><strong>richer data</strong> — give every World Cup team its <em>full</em> schedule (matches vs all opponents, not just head-to-head);</li>
+<li><strong>neutral-aware home advantage</strong> and a <strong>friendly flag</strong>, now supported as per-match observation controls <code>u = [neutral, friendly]</code>;</li>
 <li>a <strong>larger online evaluation set</strong> (the last 100 matches).</li>
 </ul>
-<p>We score each model by its out-of-sample one-step-ahead <strong>scoreline NLL</strong> and outcome
-accuracy. We select the richer model's hyperparameters by out-of-sample NLL (the
-training-marginal-likelihood MLE over-shrinks); at this scale (~5k matches, ~200
-teams) the EKF filter is used, since the particle filter's reverse-mode pass is
-memory-bound.</p>
+<p>We score each model by its out-of-sample one-step-ahead <strong>scoreline NLL</strong> and outcome accuracy. We select the richer model's hyperparameters by out-of-sample NLL (the training-marginal-likelihood MLE over-shrinks); at this scale (~5k matches, ~200 teams) the EKF filter is used, since the particle filter's reverse-mode pass is memory-bound.</p>
 </div>
 </div>
 </div>
@@ -7307,46 +7261,15 @@ fig.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="10-discussion">10. Discussion<a class="anchor-link" href="#10-discussion">¶</a></h2><p>This notebook upgraded the factorial skill model from win/draw/loss to a full
-<strong>scoreline</strong> model (each team a 2-D attack/defense state, a <strong>bivariate Poisson</strong>
-likelihood), estimated <strong>all</strong> hyperparameters by gradient ascent on the
-differentiable particle-filter marginal likelihood, evaluated it <strong>online</strong>, compared
-three parameter sets, and then <strong>diagnosed and fixed</strong> the "same score for every
-match" behaviour.</p>
+<h2 id="10-discussion">10. Discussion<a class="anchor-link" href="#10-discussion">¶</a></h2><p>This notebook upgraded the factorial skill model from win/draw/loss to a full <strong>scoreline</strong> model (each team a 2-D attack/defense state, a <strong>bivariate Poisson</strong> likelihood), estimated <strong>all</strong> hyperparameters by gradient ascent on the differentiable particle-filter marginal likelihood, evaluated it <strong>online</strong>, compared three parameter sets, and then <strong>diagnosed and fixed</strong> the "same score for every match" behaviour.</p>
 <p>Key findings:</p>
 <ul>
-<li><strong>Richer data is the cure for compression.</strong> Giving every team its full schedule
-(vs all opponents) — closer to Duffield et al.'s full-season league data — lowers the
-out-of-sample scoreline NLL, raises outcome accuracy, and restores an
-order-of-magnitude more skill spread (differentiated, interpretable ratings). The
-head-to-head subset of 48 elite teams was simply too sparse, so the
-training-marginal-likelihood MLE shrank the skills to near-equal.</li>
-<li><strong>Home advantage and a friendly flag help little here.</strong> With per-match observation
-controls (<code>u = [neutral, friendly]</code>) we tested a neutral-aware home advantage and a
-friendly scoring offset; both barely changed the NLL — the 2026 fixtures are neutral
-and elite-team home effects are weak — though the controls are a reusable modelling
-feature.</li>
-<li><strong>The gradient MLE and the NUTS posterior agree.</strong> The posterior over $\theta$
-concentrates at the compressed MLE (tiny $\tau$, small $\Sigma_0$), so on the sparse
-head-to-head data the compression is a <strong>genuine feature of the data + scoreline
-likelihood</strong>, not an artefact of the point optimiser. Among 48 elite, evenly-matched
-qualifiers, the bivariate-Poisson scoreline likelihood is weakly informative about
-skill, so the best-predicting model keeps skills near zero and emits well-calibrated,
-near-baseline scorelines.</li>
-<li><strong>The Duffield et al. dynamics are more "decisive" but not more accurate here.</strong>
-Their larger $\Sigma_0$ and $\tau$ give visibly differentiated scorelines (an order
-of magnitude more expected-goal spread), yet on the last 20 matches they score
-<em>fewer</em> correct outcomes and larger goal errors — more spread $\neq$ better for
-hard-to-predict elite scorelines.</li>
-<li><strong>Why PF for fitting, EKF for inference.</strong> The particle filter's marginal likelihood
-is differentiable (so it supports both Adam and NUTS); the EKF's is a rank-deficient
-Laplace approximation with NaN gradients for contrast observations. Once $\hat\theta$
-is fixed, the fast deterministic EKF is ideal for ratings, prediction, and the
-causal online evaluation.</li>
-<li><strong>Further modelling.</strong> A richer dataset (each team's full schedule, not just
-head-to-head among the 48), neutral-venue / home-advantage terms, or
-Ornstein–Uhlenbeck (mean-reverting) dynamics could sharpen the ratings and break the
-compression — all fit the same <code>FactorialDynamicalModel</code> interface.</li>
+<li><strong>Richer data is the cure for compression.</strong> Giving every team its full schedule (vs all opponents) — closer to Duffield et al.'s full-season league data — lowers the out-of-sample scoreline NLL, raises outcome accuracy, and restores an order-of-magnitude more skill spread (differentiated, interpretable ratings). The head-to-head subset of 48 elite teams was simply too sparse, so the training-marginal-likelihood MLE shrank the skills to near-equal.</li>
+<li><strong>Home advantage and a friendly flag help little here.</strong> With per-match observation controls (<code>u = [neutral, friendly]</code>) we tested a neutral-aware home advantage and a friendly scoring offset; both barely changed the NLL — the 2026 fixtures are neutral and elite-team home effects are weak — though the controls are a reusable modelling feature.</li>
+<li><strong>The gradient MLE and the NUTS posterior agree.</strong> The posterior over $\theta$ concentrates at the compressed MLE (tiny $\tau$, small $\Sigma_0$), so on the sparse head-to-head data the compression is a <strong>genuine feature of the data + scoreline likelihood</strong>, not an artefact of the point optimiser. Among 48 elite, evenly-matched qualifiers, the bivariate-Poisson scoreline likelihood is weakly informative about skill, so the best-predicting model keeps skills near zero and emits well-calibrated, near-baseline scorelines.</li>
+<li><strong>The Duffield et al. dynamics are more "decisive" but not more accurate here.</strong> Their larger $\Sigma_0$ and $\tau$ give visibly differentiated scorelines (an order of magnitude more expected-goal spread), yet on the last 20 matches they score <em>fewer</em> correct outcomes and larger goal errors — more spread $\neq$ better for hard-to-predict elite scorelines.</li>
+<li><strong>Why PF for fitting, EKF for inference.</strong> The particle filter's marginal likelihood is differentiable (so it supports both Adam and NUTS); the EKF's is a rank-deficient Laplace approximation with NaN gradients for contrast observations. Once $\hat\theta$ is fixed, the fast deterministic EKF is ideal for ratings, prediction, and the causal online evaluation.</li>
+<li><strong>Further modelling.</strong> A richer dataset (each team's full schedule, not just head-to-head among the 48), neutral-venue / home-advantage terms, or Ornstein–Uhlenbeck (mean-reverting) dynamics could sharpen the ratings and break the compression — all fit the same <code>FactorialDynamicalModel</code> interface.</li>
 </ul>
 </div>
 </div>

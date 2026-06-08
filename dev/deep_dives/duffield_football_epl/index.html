@@ -4844,6 +4844,19 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </style>
 <!-- End of mermaid configuration --><div class="jupyter-wrapper">
 <div class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=98ca8d15">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p><strong>🤖 AI-coded.</strong> This notebook is part of an <strong>AI-coded extension of <a href="https://github.com/BasisResearch/dynestyx">Dynestyx</a></strong> that adds factorial state-space models (fSSMs) — a <code>dynestyx</code>-based counterpart to <a href="https://github.com/state-space-models/cuthberto-carlos"><code>cuthberto-carlos</code></a>, built on <a href="https://github.com/state-space-models/cuthbert"><code>cuthbert</code></a>. It reproduces the online skill-rating models of <a href="https://doi.org/10.1093/jrsssc/qlae035">Duffield et al. (2024)</a>. See the <a href="https://github.com/DanWaxman/dynestyx">project README</a> for an overview.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=89a5765c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -4852,19 +4865,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="reproducing-duffield-et-al-2024-football-epl">Reproducing Duffield et al. (2024) — Football (EPL)<a class="anchor-link" href="#reproducing-duffield-et-al-2024-football-epl">¶</a></h1><p>This deep dive reproduces the <strong>football</strong> results of</p>
 <blockquote>
-<p>Duffield, Power, Wadsworth et al. (2024), <em>A state-space perspective on modelling and
-inference for online skill rating</em>, <strong>JRSS-C 73(5):1262–1282</strong>
-(<a href="https://github.com/SamDuffield/abile">code: <code>SamDuffield/abile</code></a>),</p>
+<p>Duffield, Power, Wadsworth et al. (2024), <em>A state-space perspective on modelling and inference for online skill rating</em>, <strong>JRSS-C 73(5):1262–1282</strong> (<a href="https://github.com/SamDuffield/abile">code: <code>SamDuffield/abile</code></a>),</p>
 </blockquote>
-<p>with dynestyx, rating <strong>English Premier League</strong> teams over 2018–2022. Football is where the
-paper makes its <strong>model-refinement</strong> point, so we fit <em>two</em> models:</p>
+<p>with dynestyx, rating <strong>English Premier League</strong> teams over 2018–2022. Football is where the paper makes its <strong>model-refinement</strong> point, so we fit <em>two</em> models:</p>
 <ol>
-<li><strong>Outcome model</strong> — scalar team skill, win/draw/loss via <code>MatchOutcomeObservation</code> (their
-Elo–Davidson SSM). Paper Table 2 EPL test NLL: <strong>0.988</strong>.</li>
-<li><strong>Bivariate-Poisson scoreline model</strong> — a 2-D <em>attack/defense</em> skill per team and a
-bivariate-Poisson goal likelihood (<code>BivariatePoissonScoreObservation</code>). Modelling the
-<em>scoreline</em> gives <strong>better win/draw/loss predictions</strong> (paper test W/D/L NLL: EKF
-<strong>0.975</strong>, SMC <strong>0.978</strong>) despite not being trained for that objective.</li>
+<li><strong>Outcome model</strong> — scalar team skill, win/draw/loss via <code>MatchOutcomeObservation</code> (their Elo–Davidson SSM). Paper Table 2 EPL test NLL: <strong>0.988</strong>.</li>
+<li><strong>Bivariate-Poisson scoreline model</strong> — a 2-D <em>attack/defense</em> skill per team and a bivariate-Poisson goal likelihood (<code>BivariatePoissonScoreObservation</code>). Modelling the <em>scoreline</em> gives <strong>better win/draw/loss predictions</strong> (paper test W/D/L NLL: EKF <strong>0.975</strong>, SMC <strong>0.978</strong>) despite not being trained for that objective.</li>
 </ol>
 <p>Data is public (<a href="https://www.football-data.co.uk">football-data.co.uk</a>) and downloaded at runtime.</p>
 </div>
@@ -4936,8 +4942,7 @@ from dynestyx.contrib import outcome_predictive_probs, score_predictive, split_n
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1-data">1. Data<a class="anchor-link" href="#1-data">¶</a></h2><p>We mirror abile's loader: EPL season CSVs (<code>E0.csv</code>) for 2018/19–2021/22, time in <strong>days</strong>
-from the 2018-07-30 origin, two factors per match <code>[home, away]</code>, and goals <code>(FTHG, FTAG)</code>.</p>
+<h2 id="1-data">1. Data<a class="anchor-link" href="#1-data">¶</a></h2><p>We mirror abile's loader: EPL season CSVs (<code>E0.csv</code>) for 2018/19–2021/22, time in <strong>days</strong> from the 2018-07-30 origin, two factors per match <code>[home, away]</code>, and goals <code>(FTHG, FTAG)</code>.</p>
 </div>
 </div>
 </div>
@@ -5061,9 +5066,7 @@ train: 1140   test: 380
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2-outcome-model-part-a-reproduce-and-part-b-independent-fit">2. Outcome model — Part A (reproduce) and Part B (independent fit)<a class="anchor-link" href="#2-outcome-model-part-a-reproduce-and-part-b-independent-fit">¶</a></h2><p><code>MatchOutcomeObservation(draw_margin=ε, scale=1)</code>. Following abile, the EPL outcome model has
-<strong>no explicit home-advantage term</strong> (<code>home_advantage=0</code>). Duffield's fitted EKF params:
-<code>init_var=0.131, τ=0.00100, ε=0.474</code>.</p>
+<h2 id="2-outcome-model-part-a-reproduce-and-part-b-independent-fit">2. Outcome model — Part A (reproduce) and Part B (independent fit)<a class="anchor-link" href="#2-outcome-model-part-a-reproduce-and-part-b-independent-fit">¶</a></h2><p><code>MatchOutcomeObservation(draw_margin=ε, scale=1)</code>. Following abile, the EPL outcome model has <strong>no explicit home-advantage term</strong> (<code>home_advantage=0</code>). Duffield's fitted EKF params: <code>init_var=0.131, τ=0.00100, ε=0.474</code>.</p>
 </div>
 </div>
 </div>
@@ -5275,17 +5278,8 @@ print(f"  validation NLL {best[0]:.3f}   test NLL {best[1]:.3f}   (Duffield test
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3-bivariate-poisson-scoreline-model">3. Bivariate-Poisson scoreline model<a class="anchor-link" href="#3-bivariate-poisson-scoreline-model">¶</a></h2><p>Each team now has a <strong>2-D</strong> skill $(x^{\text{att}}, x^{\text{def}})$. A match scoreline
-$(y_h, y_a)$ is bivariate Poisson with
-$\lambda_1 = e^{\alpha_h + x^{\text{att}}_h - x^{\text{def}}_a}$,
-$\lambda_2 = e^{\alpha_a + x^{\text{att}}_a - x^{\text{def}}_h}$,
-$\lambda_3 = e^{\beta}$ (shared-goals correlation). dynestyx's
-<code>BivariatePoissonScoreObservation(alpha, beta, home_advantage)</code> uses a single baseline
-$\alpha$ plus a home shift $h$, so Duffield's $(\alpha_h, \alpha_a, \beta)$ map to
-$\alpha = \alpha_a$, $h = \alpha_h - \alpha_a$, $\beta = \beta$. The separate home/away
-baselines give this model the home advantage the outcome model lacks.</p>
-<p>We report the held-out <strong>win/draw/loss</strong> NLL (the paper's metric, obtained by summing the
-predicted scoreline grid into W/D/L) — comparable to the outcome model above.</p>
+<h2 id="3-bivariate-poisson-scoreline-model">3. Bivariate-Poisson scoreline model<a class="anchor-link" href="#3-bivariate-poisson-scoreline-model">¶</a></h2><p>Each team now has a <strong>2-D</strong> skill $(x^{\text{att}}, x^{\text{def}})$. A match scoreline $(y_h, y_a)$ is bivariate Poisson with $\lambda_1 = e^{\alpha_h + x^{\text{att}}_h - x^{\text{def}}_a}$, $\lambda_2 = e^{\alpha_a + x^{\text{att}}_a - x^{\text{def}}_h}$, $\lambda_3 = e^{\beta}$ (shared-goals correlation). dynestyx's <code>BivariatePoissonScoreObservation(alpha, beta, home_advantage)</code> uses a single baseline $\alpha$ plus a home shift $h$, so Duffield's $(\alpha_h, \alpha_a, \beta)$ map to $\alpha = \alpha_a$, $h = \alpha_h - \alpha_a$, $\beta = \beta$. The separate home/away baselines give this model the home advantage the outcome model lacks.</p>
+<p>We report the held-out <strong>win/draw/loss</strong> NLL (the paper's metric, obtained by summing the predicted scoreline grid into W/D/L) — comparable to the outcome model above.</p>
 </div>
 </div>
 </div>
@@ -5430,15 +5424,8 @@ pd.DataFrame({
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>The <strong>particle-filter</strong> bivariate-Poisson model's held-out W/D/L NLL (~0.95) clearly
-improves on the plain outcome model (~0.99), <strong>reproducing the paper's central finding</strong>:
-modelling the scoreline yields better match-winner predictions, because attack/defense skills
-plus separate home/away scoring rates capture information the 3-way outcome model discards.</p>
-<p>The EKF row is <em>biased high</em> here: unlike the scalar models, the bivariate-Poisson likelihood
-depends on the 4-D joint skill only through two contrasts, so its observation Hessian is
-rank-deficient and the EKF is forward-only — its filtered states (hence W/D/L) degrade. The
-<strong>particle filter, which needs no such linearization, is the faithful backend</strong> and is what
-reproduces the result (consistent with the smaller EKF bias seen for the scalar sports).</p>
+<p>The <strong>particle-filter</strong> bivariate-Poisson model's held-out W/D/L NLL (~0.95) clearly improves on the plain outcome model (~0.99), <strong>reproducing the paper's central finding</strong>: modelling the scoreline yields better match-winner predictions, because attack/defense skills plus separate home/away scoring rates capture information the 3-way outcome model discards.</p>
+<p>The EKF row is <em>biased high</em> here: unlike the scalar models, the bivariate-Poisson likelihood depends on the 4-D joint skill only through two contrasts, so its observation Hessian is rank-deficient and the EKF is forward-only — its filtered states (hence W/D/L) degrade. The <strong>particle filter, which needs no such linearization, is the faithful backend</strong> and is what reproduces the result (consistent with the smaller EKF bias seen for the scalar sports).</p>
 </div>
 </div>
 </div>
@@ -5449,10 +5436,7 @@ reproduces the result (consistent with the smaller EKF bias seen for the scalar 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="part-b-fit-the-bivariate-poisson-hyperparameters-with-dynestyx-pf-adam">Part B — fit the bivariate-Poisson hyperparameters with dynestyx (PF + Adam)<a class="anchor-link" href="#part-b-fit-the-bivariate-poisson-hyperparameters-with-dynestyx-pf-adam">¶</a></h3><p>The EKF is forward-only for this rank-deficient scoreline likelihood, so we fit on the
-<em>training</em> set with the differentiable <strong>particle-filter</strong> marginal likelihood and Adam
-(common random numbers / fixed key), optimising $(\alpha, \beta, h, \log\tau)$ with the
-initial covariance fixed. This mirrors Duffield et al.'s EM in spirit via gradient ascent.</p>
+<h3 id="part-b-fit-the-bivariate-poisson-hyperparameters-with-dynestyx-pf-adam">Part B — fit the bivariate-Poisson hyperparameters with dynestyx (PF + Adam)<a class="anchor-link" href="#part-b-fit-the-bivariate-poisson-hyperparameters-with-dynestyx-pf-adam">¶</a></h3><p>The EKF is forward-only for this rank-deficient scoreline likelihood, so we fit on the <em>training</em> set with the differentiable <strong>particle-filter</strong> marginal likelihood and Adam (common random numbers / fixed key), optimising $(\alpha, \beta, h, \log\tau)$ with the initial covariance fixed. This mirrors Duffield et al.'s EM in spirit via gradient ascent.</p>
 </div>
 </div>
 </div>
@@ -5565,9 +5549,7 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4-attack-defense-ratings-and-a-scoreline-forecast">4. Attack / defense ratings and a scoreline forecast<a class="anchor-link" href="#4-attack-defense-ratings-and-a-scoreline-forecast">¶</a></h2><p>Filtering the bivariate-Poisson model gives each team an attack and a defense trajectory.
-The paper highlights Tottenham's 2022 defensive decline (their Figure 4); we plot attack and
-defense for a few clubs, then show a predicted scoreline grid for one fixture.</p>
+<h2 id="4-attack-defense-ratings-and-a-scoreline-forecast">4. Attack / defense ratings and a scoreline forecast<a class="anchor-link" href="#4-attack-defense-ratings-and-a-scoreline-forecast">¶</a></h2><p>Filtering the bivariate-Poisson model gives each team an attack and a defense trajectory. The paper highlights Tottenham's 2022 defensive decline (their Figure 4); we plot attack and defense for a few clubs, then show a predicted scoreline grid for one fixture.</p>
 </div>
 </div>
 </div>
@@ -5726,10 +5708,7 @@ plt.colorbar(im, label="probability"); plt.tight_layout(); plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5-online-performance-on-held-out-matches">5. Online performance on held-out matches<a class="anchor-link" href="#5-online-performance-on-held-out-matches">¶</a></h2><p>Using the <strong>self-fitted</strong> bivariate-Poisson parameters, we replay the held-out test period one
-match at a time. For the most recent matches we plot the model's <strong>expected goals</strong> for and
-against the home team (its one-step-ahead scoreline forecast) against the <strong>actual</strong> goals,
-coloured green where the predicted match outcome (win/draw/loss) was correct.</p>
+<h2 id="5-online-performance-on-held-out-matches">5. Online performance on held-out matches<a class="anchor-link" href="#5-online-performance-on-held-out-matches">¶</a></h2><p>Using the <strong>self-fitted</strong> bivariate-Poisson parameters, we replay the held-out test period one match at a time. For the most recent matches we plot the model's <strong>expected goals</strong> for and against the home team (its one-step-ahead scoreline forecast) against the <strong>actual</strong> goals, coloured green where the predicted match outcome (win/draw/loss) was correct.</p>
 </div>
 </div>
 </div>
@@ -5833,21 +5812,13 @@ plt.tight_layout(); plt.show()</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="6-discussion">6. Discussion<a class="anchor-link" href="#6-discussion">¶</a></h2><ul>
-<li><strong>Reproduction.</strong> dynestyx reproduces both EPL results: the outcome-model test NLL (~0.99)
-and, crucially, the <strong>bivariate-Poisson improvement</strong> to ~0.97 W/D/L NLL — the paper's
-model-refinement conclusion — on the same data, with the EKF and the particle filter.</li>
-<li><strong>Independent fit.</strong> A dynestyx PF+Adam fit of the scoreline model recovers sensible
-attack/defense baselines and a held-out NLL close to the published one, without reusing
-Duffield et al.'s EM values.</li>
-<li><strong>Why scorelines help.</strong> Attack/defense skills plus separate home/away scoring rates
-($\alpha_h&gt;\alpha_a$ = home advantage) encode information the 3-way outcome model throws
-away — hence the better match-winner predictions.</li>
+<li><strong>Reproduction.</strong> dynestyx reproduces both EPL results: the outcome-model test NLL (~0.99) and, crucially, the <strong>bivariate-Poisson improvement</strong> to ~0.97 W/D/L NLL — the paper's model-refinement conclusion — on the same data, with the EKF and the particle filter.</li>
+<li><strong>Independent fit.</strong> A dynestyx PF+Adam fit of the scoreline model recovers sensible attack/defense baselines and a held-out NLL close to the published one, without reusing Duffield et al.'s EM values.</li>
+<li><strong>Why scorelines help.</strong> Attack/defense skills plus separate home/away scoring rates ($\alpha_h&gt;\alpha_a$ = home advantage) encode information the 3-way outcome model throws away — hence the better match-winner predictions.</li>
 <li>Companion notebooks: <code>duffield_tennis_wta</code> (no draws) and <code>duffield_chess</code> (heavy draws).</li>
 </ul>
 <blockquote>
-<p>The factor-marginalized filter is exact on loop-free schedules and a tight approximation on
-cyclic ones; a league's dense round-robin is mildly cyclic, well within the accurate regime
-(validated in the test suite).</p>
+<p>The factor-marginalized filter is exact on loop-free schedules and a tight approximation on cyclic ones; a league's dense round-robin is mildly cyclic, well within the accurate regime (validated in the test suite).</p>
 </blockquote>
 </div>
 </div>
