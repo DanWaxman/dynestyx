@@ -4897,8 +4897,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </blockquote>
 <p>with dynestyx, rating <strong>English Premier League</strong> teams over 2018–2022. Football is where the paper makes its <strong>model-refinement</strong> point, so we fit <em>two</em> models:</p>
 <ol>
-<li><strong>Outcome model</strong> — scalar team skill, win/draw/loss via <code>MatchOutcomeObservation</code> (their Elo–Davidson SSM). Paper Table 2 EPL test NLL: <strong>0.988</strong>.</li>
-<li><strong>Bivariate-Poisson scoreline model</strong> — a 2-D <em>attack/defense</em> skill per team and a bivariate-Poisson goal likelihood (<code>BivariatePoissonScoreObservation</code>). Modelling the <em>scoreline</em> gives <strong>better win/draw/loss predictions</strong> (paper test W/D/L NLL: EKF <strong>0.975</strong>, SMC <strong>0.978</strong>) despite not being trained for that objective.</li>
+<li><strong>Outcome model</strong> — scalar team skill, win/draw/loss via <code>MatchOutcomeObservation</code> (their Elo–Davidson SSM). Paper Table 2 EPL outcome <strong>test</strong> NLL: <strong>0.965</strong> (their ExKF), 0.961 (best). <em>(0.988 is the train NLL.)</em></li>
+<li><strong>Bivariate-Poisson scoreline model</strong> — a 2-D <em>attack/defense</em> skill per team and a bivariate-Poisson goal likelihood (<code>BivariatePoissonScoreObservation</code>). Modelling the <em>scoreline</em> gives <strong>better win/draw/loss predictions</strong> (paper <strong>test</strong> W/D/L NLL: EKF <strong>0.954</strong>, SMC <strong>0.956</strong>) despite not being trained for that objective.</li>
 </ol>
 <p>Data is public (<a href="https://www.football-data.co.uk">football-data.co.uk</a>) and downloaded at runtime.</p>
 </div>
@@ -5151,7 +5151,7 @@ train: 1140   test: 380
     <span class="s2">"Method"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"EKF"</span><span class="p">,</span> <span class="s2">"SMC"</span><span class="p">],</span>
     <span class="s2">"dynestyx train"</span><span class="p">:</span> <span class="p">[</span><span class="n">r_o_exkf</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">],</span> <span class="n">r_o_smc</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">]],</span>
     <span class="s2">"dynestyx test"</span><span class="p">:</span>  <span class="p">[</span><span class="n">r_o_exkf</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">],</span>  <span class="n">r_o_smc</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]],</span>
-    <span class="s2">"Duffield test"</span><span class="p">:</span>  <span class="p">[</span><span class="mf">0.988</span><span class="p">,</span> <span class="mf">0.988</span><span class="p">],</span>
+    <span class="s2">"Duffield test"</span><span class="p">:</span>  <span class="p">[</span><span class="mf">0.965</span><span class="p">,</span> <span class="mf">0.963</span><span class="p">],</span>
 <span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-3">def outcome_model(init_var, tau, eps):
@@ -5182,7 +5182,7 @@ pd.DataFrame({
     "Method": ["EKF", "SMC"],
     "dynestyx train": [r_o_exkf["train_nll"], r_o_smc["train_nll"]],
     "dynestyx test":  [r_o_exkf["test_nll"],  r_o_smc["test_nll"]],
-    "Duffield test":  [0.988, 0.988],
+    "Duffield test":  [0.965, 0.963],
 }).round(3)</div>
 </div>
 </div>
@@ -5272,7 +5272,7 @@ pd.DataFrame({
             <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">owin</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">test_start</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">init_var</span><span class="o">=</span><span class="n">iv</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dynestyx-selected (PF, by validation): </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  validation NLL </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   test NLL </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   (Duffield test 0.988)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  validation NLL </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   test NLL </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   (Duffield ExKF test 0.965)"</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-4"># Part B: independent fit with the particle filter, scored on a validation window.
 best = None
@@ -5285,7 +5285,7 @@ for tau in [3e-3, 6e-3, 1e-2]:
             if best is None or v &lt; best[0]:
                 best = (v, owin(pp, test_start, K), dict(init_var=iv, tau=tau, eps=eps))
 print(f"dynestyx-selected (PF, by validation): {best[2]}")
-print(f"  validation NLL {best[0]:.3f}   test NLL {best[1]:.3f}   (Duffield test 0.988)")</div>
+print(f"  validation NLL {best[0]:.3f}   test NLL {best[1]:.3f}   (Duffield ExKF test 0.965)")</div>
 </div>
 </div>
 </div>
@@ -5298,7 +5298,7 @@ print(f"  validation NLL {best[0]:.3f}   test NLL {best[1]:.3f}   (Duffield test
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>dynestyx-selected (PF, by validation): {'init_var': 0.15, 'tau': 0.003, 'eps': 0.45}
-  validation NLL 1.010   test NLL 0.975   (Duffield test 0.988)
+  validation NLL 1.010   test NLL 0.975   (Duffield ExKF test 0.965)
 </pre>
 </div>
 </div>
@@ -5362,7 +5362,7 @@ print(f"  validation NLL {best[0]:.3f}   test NLL {best[1]:.3f}   (Duffield test
     <span class="s2">"Method"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Bivariate-Poisson EKF"</span><span class="p">,</span> <span class="s2">"Bivariate-Poisson SMC"</span><span class="p">],</span>
     <span class="s2">"dynestyx W/D/L train"</span><span class="p">:</span> <span class="p">[</span><span class="n">r_bp_exkf</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">],</span> <span class="n">r_bp_smc</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">]],</span>
     <span class="s2">"dynestyx W/D/L test"</span><span class="p">:</span>  <span class="p">[</span><span class="n">r_bp_exkf</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">],</span>  <span class="n">r_bp_smc</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]],</span>
-    <span class="s2">"Duffield W/D/L test"</span><span class="p">:</span>  <span class="p">[</span><span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.978</span><span class="p">],</span>
+    <span class="s2">"Duffield W/D/L test"</span><span class="p">:</span>  <span class="p">[</span><span class="mf">0.954</span><span class="p">,</span> <span class="mf">0.956</span><span class="p">],</span>
 <span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-5">EXKF_init_cov = jnp.array([[0.08750192, 0.06225643], [0.06225643, 0.05477126]])
@@ -5391,7 +5391,7 @@ pd.DataFrame({
     "Method": ["Bivariate-Poisson EKF", "Bivariate-Poisson SMC"],
     "dynestyx W/D/L train": [r_bp_exkf["train_nll"], r_bp_smc["train_nll"]],
     "dynestyx W/D/L test":  [r_bp_exkf["test_nll"],  r_bp_smc["test_nll"]],
-    "Duffield W/D/L test":  [0.975, 0.978],
+    "Duffield W/D/L test":  [0.954, 0.956],
 }).round(3)</div>
 </div>
 </div>
@@ -5520,7 +5520,7 @@ pd.DataFrame({
 
 <span class="n">r_fit</span><span class="p">,</span> <span class="n">bp_online_out</span> <span class="o">=</span> <span class="n">bp_wdl_nll</span><span class="p">(</span><span class="n">alpha_f</span> <span class="o">+</span> <span class="n">home_f</span><span class="p">,</span> <span class="n">alpha_f</span><span class="p">,</span> <span class="n">beta_f</span><span class="p">,</span> <span class="n">tau_f</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">,</span>
                                   <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  held-out W/D/L test NLL with self-fitted params: </span><span class="si">{</span><span class="n">r_fit</span><span class="p">[</span><span class="s1">'test_nll'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  (Duffield 0.978)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  held-out W/D/L test NLL with self-fitted params: </span><span class="si">{</span><span class="n">r_fit</span><span class="p">[</span><span class="s1">'test_nll'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  (Duffield BP test 0.954)"</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-6">train_t = match_times[:test_start]
 train_g = match_goals[:test_start]
@@ -5549,7 +5549,7 @@ print(f"Duffield (EM):       alpha_a={EXKF_ab[1]:.3f}, beta={EXKF_ab[2]:.3f}, "
 
 r_fit, bp_online_out = bp_wdl_nll(alpha_f + home_f, alpha_f, beta_f, tau_f, EXKF_init_cov,
                                   FactorialPFConfig(n_particles=1000), jax.random.PRNGKey(0))
-print(f"  held-out W/D/L test NLL with self-fitted params: {r_fit['test_nll']:.3f}  (Duffield 0.978)")</div>
+print(f"  held-out W/D/L test NLL with self-fitted params: {r_fit['test_nll']:.3f}  (Duffield BP test 0.954)")</div>
 </div>
 </div>
 </div>
@@ -5569,7 +5569,7 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>  held-out W/D/L test NLL with self-fitted params: 0.949  (Duffield 0.978)
+<pre>  held-out W/D/L test NLL with self-fitted params: 0.949  (Duffield BP test 0.954)
 </pre>
 </div>
 </div>
@@ -5860,7 +5860,7 @@ plt.tight_layout(); plt.show()</div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="6-discussion">6. Discussion<a class="anchor-link" href="#6-discussion">¶</a></h2><ul>
-<li><strong>Reproduction.</strong> dynestyx reproduces both EPL results: the outcome-model test NLL (~0.99) and, crucially, the <strong>bivariate-Poisson improvement</strong> to ~0.97 W/D/L NLL — the paper's model-refinement conclusion — on the same data, with the EKF and the particle filter.</li>
+<li><strong>Reproduction.</strong> dynestyx reproduces the paper's <strong>model-refinement</strong> finding on EPL: the bivariate-Poisson scoreline model's held-out W/D/L <strong>test</strong> NLL (~0.95, matching the paper's 0.954) clearly improves on the plain outcome model — the paper's central conclusion — with both the EKF and the particle filter. (Published <strong>test</strong> NLLs: outcome 0.965, scoreline 0.954; the 0.988 sometimes quoted is the <em>train</em> NLL.)</li>
 <li><strong>Independent fit.</strong> A dynestyx PF+Adam fit of the scoreline model recovers sensible attack/defense baselines and a held-out NLL close to the published one, without reusing Duffield et al.'s EM values.</li>
 <li><strong>Why scorelines help.</strong> Attack/defense skills plus separate home/away scoring rates ($\alpha_h&gt;\alpha_a$ = home advantage) encode information the 3-way outcome model throws away — hence the better match-winner predictions.</li>
 <li>Companion notebooks: <code>duffield_tennis_wta</code> (no draws) and <code>duffield_chess</code> (heavy draws).</li>

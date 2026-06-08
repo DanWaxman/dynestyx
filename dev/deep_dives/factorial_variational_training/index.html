@@ -5992,7 +5992,7 @@ pd.DataFrame({
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p><strong>Held-out predictive performance</strong> at the posterior mean, via the existing
-<code>dynestyx.contrib</code> one-step-ahead helper (paper Table 2 reference: EPL outcome test NLL ≈ 0.988):</p>
+<code>dynestyx.contrib</code> one-step-ahead helper (paper Table 2: EPL outcome <strong>test</strong> NLL ≈ 0.965 (their ExKF), 0.961 (best); the 0.988 sometimes quoted is the <em>train</em> NLL):</p>
 </div>
 </div>
 </div>
@@ -6021,7 +6021,7 @@ pd.DataFrame({
                               <span class="n">obs_times</span><span class="o">=</span><span class="n">e_times</span><span class="p">,</span> <span class="n">obs_values</span><span class="o">=</span><span class="n">e_out</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">e_idx</span><span class="p">,</span>
                               <span class="n">key</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
 <span class="n">nll</span> <span class="o">=</span> <span class="n">split_nll</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">e_out</span><span class="p">,</span> <span class="n">e_test_start</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"held-out test NLL at the SVI posterior mean: </span><span class="si">{</span><span class="n">nll</span><span class="p">[</span><span class="s1">'test_nll'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  (Duffield 0.988)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"held-out test NLL at the SVI posterior mean: </span><span class="si">{</span><span class="n">nll</span><span class="p">[</span><span class="s1">'test_nll'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  (Duffield test 0.965 ExKF, 0.961 best)"</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-13">from dynestyx.contrib import outcome_predictive_probs, split_nll
 e_mean = {k: e_post[k].mean(0) for k in e_post}
@@ -6029,7 +6029,7 @@ pp = outcome_predictive_probs(outcome_model(e_mean), FactorialPFConfig(n_particl
                               obs_times=e_times, obs_values=e_out, obs_factor_indices=e_idx,
                               key=jax.random.PRNGKey(7))
 nll = split_nll(pp, e_out, e_test_start)
-print(f"held-out test NLL at the SVI posterior mean: {nll['test_nll']:.3f}  (Duffield 0.988)")</div>
+print(f"held-out test NLL at the SVI posterior mean: {nll['test_nll']:.3f}  (Duffield test 0.965 ExKF, 0.961 best)")</div>
 </div>
 </div>
 </div>
@@ -6041,7 +6041,7 @@ print(f"held-out test NLL at the SVI posterior mean: {nll['test_nll']:.3f}  (Duf
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>held-out test NLL at the SVI posterior mean: 0.961  (Duffield 0.988)
+<pre>held-out test NLL at the SVI posterior mean: 0.961  (Duffield test 0.965 ExKF, 0.961 best)
 </pre>
 </div>
 </div>
