@@ -119,3 +119,121 @@ class BivariatePoisson(Distribution):
     @property
     def mean(self) -> Float[Array, "*batch two"]:
         return jnp.stack([self.lam1 + self.lam3, self.lam2 + self.lam3], axis=-1)
+
+
+class BivariateNegativeBinomial(Distribution):
+    r"""Bivariate negative-binomial distribution (independent overdispersed margins).
+
+    An overdispersed alternative to :class:`BivariatePoisson` for a pair of counts
+    $(Y_1, Y_2)$. Each margin is an independent negative binomial with mean $\lambda_j$
+    and a shared dispersion $r > 0$:
+
+    $$
+    Y_j \sim \mathrm{NB}\!\left(\text{mean}=\lambda_j,\ \text{dispersion}=r\right),
+    \qquad j \in \{1, 2\}\ \text{(independent)},
+    $$
+
+    so $\mathbb{E}[Y_j] = \lambda_j$ and $\mathrm{Var}[Y_j] = \lambda_j + \lambda_j^2 / r$
+    (variance $>$ mean: overdispersed). The two scores are **independent**
+    ($\mathrm{cov}(Y_1, Y_2) = 0$); as $r \to \infty$ the variance collapses to the mean
+    and the distribution reduces to a product of two independent
+    $\mathrm{Poisson}(\lambda_j)$.
+
+    The log-density is the sum of the two NB log-pmfs in the mean/dispersion
+    parameterization,
+
+    $$
+    \log p(y_1, y_2) = \sum_{j=1,2}
+        \log\Gamma(y_j + r) - \log\Gamma(r) - \log\Gamma(y_j + 1)
+        + r\,\log\!\frac{r}{r + \lambda_j} + y_j\,\log\!\frac{\lambda_j}{r + \lambda_j},
+    $$
+
+    closed-form and twice-differentiable in $\lambda_1, \lambda_2, r$ (no convolution
+    sum), so it slots into the factorial EKF/PF filters and VI in place of
+    :class:`BivariatePoisson`.
+
+    In the football score model this is the likelihood of a scoreline given two teams'
+    attack/defense skills, with
+    $\lambda_1 = \exp(\alpha + h + x^{\mathrm{att},i} - x^{\mathrm{def},j})$ and
+    $\lambda_2 = \exp(\alpha + x^{\mathrm{att},j} - x^{\mathrm{def},i})$ -- the same mean
+    structure as the bivariate Poisson, with overdispersion added through $r$. (There is
+    no shared-goals $\lambda_3$ term: football scores are empirically near-uncorrelated,
+    so the margins are modelled independently and $r$ captures overdispersion alone.)
+
+    Attributes:
+        lam1, lam2 (jax.Array): The margin means $\lambda_1, \lambda_2 > 0$ (broadcast to
+            the batch shape).
+        dispersion (jax.Array): The shared NB dispersion $r > 0$; smaller is more
+            overdispersed, $r \to \infty$ recovers the Poisson.
+    """
+
+    arg_constraints = {
+        "lam1": constraints.positive,
+        "lam2": constraints.positive,
+        "dispersion": constraints.positive,
+    }
+    support = constraints.independent(constraints.nonnegative_integer, 1)
+    pytree_data_fields = ("lam1", "lam2", "dispersion")
+
+    def __init__(
+        self,
+        lam1: Float[Array, "..."] | float,
+        lam2: Float[Array, "..."] | float,
+        dispersion: Float[Array, "..."] | float,
+        *,
+        validate_args=None,
+    ):
+        self.lam1 = jnp.asarray(lam1, dtype=float)
+        self.lam2 = jnp.asarray(lam2, dtype=float)
+        self.dispersion = jnp.asarray(dispersion, dtype=float)
+        batch_shape = jnp.broadcast_shapes(
+            jnp.shape(self.lam1), jnp.shape(self.lam2), jnp.shape(self.dispersion)
+        )
+        super().__init__(
+            batch_shape=batch_shape, event_shape=(2,), validate_args=validate_args
+        )
+
+    def _nb2_log_prob(self, y, lam):
+        # No jaxtyping annotations: ``y`` (e.g. a score grid) and ``lam`` (the batch rate)
+        # broadcast to different shapes, which a shared ``*batch`` axis would reject.
+        r = self.dispersion
+        # NB in (mean=lam, dispersion=r) form; log r/(r+lam) and log lam/(r+lam) written
+        # as differences to stay twice-differentiable in lam and r (for the EKF Hessian
+        # and PF/VI gradients).
+        log_r = jnp.log(r)
+        log_lam = jnp.log(lam)
+        log_rl = jnp.log(r + lam)
+        return (
+            gammaln(y + r)
+            - gammaln(r)
+            - gammaln(y + 1.0)
+            + r * (log_r - log_rl)
+            + y * (log_lam - log_rl)
+        )
+
+    def log_prob(self, value: Real[Array, "*batch two"]) -> Float[Array, "*batch"]:
+        value = jnp.asarray(value, dtype=float)
+        y1 = value[..., 0]
+        y2 = value[..., 1]
+        return self._nb2_log_prob(y1, self.lam1) + self._nb2_log_prob(y2, self.lam2)
+
+    def sample(
+        self, key: jax.Array, sample_shape: tuple[int, ...] = ()
+    ) -> Int[Array, "*sample_and_batch two"]:
+        shape = tuple(sample_shape) + self.batch_shape
+        kg1, kp1, kg2, kp2 = jax.random.split(key, 4)
+        r = jnp.broadcast_to(self.dispersion, shape)
+
+        def nb_sample(kg, kp, lam):
+            lam = jnp.broadcast_to(lam, shape)
+            # NB == Gamma(shape=r, rate=r/lam)-mixed Poisson: draw the Poisson rate then count.
+            rate = jax.random.gamma(kg, r, shape) * lam / r
+            return jax.random.poisson(kp, rate, shape)
+
+        y1 = nb_sample(kg1, kp1, self.lam1)
+        y2 = nb_sample(kg2, kp2, self.lam2)
+        return jnp.stack([y1, y2], axis=-1)
+
+    @property
+    def mean(self) -> Float[Array, "*batch two"]:
+        return jnp.stack([self.lam1, self.lam2], axis=-1)

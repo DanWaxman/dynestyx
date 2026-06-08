@@ -19,6 +19,8 @@ from dynestyx.inference.smoother_configs import (
 )
 from dynestyx.inference.smoothers import Smoother
 from dynestyx.models import (
+    BivariateNegativeBinomial,
+    BivariateNegativeBinomialScoreObservation,
     BivariatePoisson,
     BivariatePoissonScoreObservation,
     ContinuousTimeStateEvolution,
@@ -68,6 +70,8 @@ __all__ = [
     "RandomWalkEvolution",
     "OrnsteinUhlenbeckEvolution",
     "MatchOutcomeObservation",
+    "BivariateNegativeBinomial",
+    "BivariateNegativeBinomialScoreObservation",
     "BivariatePoisson",
     "BivariatePoissonScoreObservation",
     "factorial_outcome_probabilities",

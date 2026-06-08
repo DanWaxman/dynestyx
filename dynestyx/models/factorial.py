@@ -57,7 +57,7 @@ from dynestyx.models.core import (
     ObservationModelLike,
     StateEvolutionLike,
 )
-from dynestyx.models.distributions import BivariatePoisson
+from dynestyx.models.distributions import BivariateNegativeBinomial, BivariatePoisson
 from dynestyx.types import as_scalar_time_array
 
 
@@ -381,6 +381,115 @@ class BivariatePoissonScoreObservation(ObservationModel):
         lam2 = jnp.exp(alpha_eff + att_j - def_i)
         lam3 = jnp.exp(self.beta)
         return BivariatePoisson(lam1, lam2, lam3, max_goals=self.max_goals)
+
+
+class BivariateNegativeBinomialScoreObservation(ObservationModel):
+    r"""Overdispersed scoreline observation from attack/defense skills.
+
+    A drop-in, overdispersed alternative to :class:`BivariatePoissonScoreObservation`.
+    Acts on the same length-``4`` joint-local state ``[att_i, def_i, att_j, def_j]`` and
+    returns a :class:`~dynestyx.models.distributions.BivariateNegativeBinomial` over the
+    scoreline ``(home_goals, away_goals)`` with the **same skill-contrast means** as the
+    bivariate Poisson,
+
+    $$
+    \lambda_1 = \exp(\alpha + h + x^{\mathrm{att},i} - x^{\mathrm{def},j}),\quad
+    \lambda_2 = \exp(\alpha + x^{\mathrm{att},j} - x^{\mathrm{def},i}),
+    $$
+
+    but with each margin negative-binomial (mean $\lambda_j$, variance
+    $\lambda_j + \lambda_j^2 / r$) rather than Poisson (variance $= \lambda_j$), governed
+    by a learnable dispersion $r = \exp(\texttt{log\_dispersion})$. As $r \to \infty$ this
+    reduces to a product of independent Poissons (the bivariate Poisson with
+    $\lambda_3 = 0$), so it strictly generalizes the Poisson scoreline likelihood with one
+    extra parameter.
+
+    Unlike the bivariate Poisson there is **no $\beta$/$\lambda_3$ shared-goals term**: the
+    margins are modelled as independent (football scores are empirically
+    near-uncorrelated, with the bivariate Poisson's $\lambda_3 = e^\beta \approx 0.01$ in
+    fits), so $r$ captures overdispersion without imposing a spurious correlation. Per-match
+    covariates ``u = [neutral, friendly]`` are handled exactly as in
+    :class:`BivariatePoissonScoreObservation`.
+
+    Note:
+        As with :class:`BivariatePoissonScoreObservation`, the EKF (Taylor) factorial
+        filter is **forward-only** for this observation (the score potential depends on the
+        4-D state only through the two contrasts ``att_i - def_j`` and ``att_j - def_i``, so
+        its linearized Hessian is rank-deficient). Use the EKF for
+        filtering/smoothing/prediction and ``FactorialPFConfig`` (particle filter) for
+        gradient-based / variational parameter inference.
+
+    Attributes:
+        alpha (jax.Array): Baseline log scoring rate $\alpha$.
+        home_advantage (jax.Array): Additive home-team log-rate shift $h$ (default 0).
+        friendly_offset (jax.Array): Baseline-rate shift applied to friendlies.
+        log_dispersion (jax.Array): Log NB dispersion $\log r$; larger $\to$ Poisson.
+        num_local_factors (int): Factors per observation; must be ``2`` (pairwise).
+        factor_state_dim (int): Per-factor state dimension; must be ``2`` (attack, defense).
+    """
+
+    alpha: Float[Array, ""]
+    home_advantage: Float[Array, ""]
+    friendly_offset: Float[Array, ""]
+    log_dispersion: Float[Array, ""]
+    num_local_factors: int = eqx.field(static=True)
+    factor_state_dim: int = eqx.field(static=True)
+
+    def __init__(
+        self,
+        alpha: float | int | Float[Array, ""] = 0.0,
+        home_advantage: float | int | Float[Array, ""] = 0.0,
+        friendly_offset: float | int | Float[Array, ""] = 0.0,
+        log_dispersion: float | int | Float[Array, ""] = float(jnp.log(10.0)),
+        *,
+        num_local_factors: int = 2,
+        factor_state_dim: int = 2,
+    ):
+        """
+        Args:
+            alpha: Baseline log scoring rate $\\alpha$.
+            home_advantage: Additive home-team log-rate shift $h$ (scaled by
+                ``1 - neutral`` when a per-match ``u = [neutral, friendly]`` is given).
+            friendly_offset: Additive baseline-rate shift applied when ``friendly``
+                (the second control) is set.
+            log_dispersion: Log of the shared NB dispersion $r$ (default $\\log 10$, mildly
+                overdispersed / near-Poisson); larger values approach the Poisson.
+            num_local_factors: Factors per observation (must be ``2``).
+            factor_state_dim: Per-factor state dimension (must be ``2``).
+        """
+        if int(num_local_factors) != 2:
+            raise ValueError(
+                "BivariateNegativeBinomialScoreObservation supports pairwise comparisons "
+                f"only (num_local_factors=2); got {num_local_factors}."
+            )
+        if int(factor_state_dim) != 2:
+            raise ValueError(
+                "BivariateNegativeBinomialScoreObservation requires a 2-D attack/defense "
+                f"state (factor_state_dim=2); got {factor_state_dim}."
+            )
+        self.alpha = jnp.asarray(alpha, dtype=float)
+        self.home_advantage = jnp.asarray(home_advantage, dtype=float)
+        self.friendly_offset = jnp.asarray(friendly_offset, dtype=float)
+        self.log_dispersion = jnp.asarray(log_dispersion, dtype=float)
+        self.num_local_factors = int(num_local_factors)
+        self.factor_state_dim = int(factor_state_dim)
+
+    def __call__(self, x, u, t):
+        x = jnp.reshape(x, (self.num_local_factors, self.factor_state_dim))
+        att_i, def_i = x[0, 0], x[0, 1]
+        att_j, def_j = x[1, 0], x[1, 1]
+        neutral, friendly = 0.0, 0.0
+        if u is not None:
+            u = jnp.atleast_1d(jnp.asarray(u, dtype=float))
+            if u.shape[0] >= 1:
+                neutral = u[0]
+            if u.shape[0] >= 2:
+                friendly = u[1]
+        home = self.home_advantage * (1.0 - neutral)
+        alpha_eff = self.alpha + self.friendly_offset * friendly
+        lam1 = jnp.exp(alpha_eff + home + att_i - def_j)
+        lam2 = jnp.exp(alpha_eff + att_j - def_i)
+        return BivariateNegativeBinomial(lam1, lam2, jnp.exp(self.log_dispersion))
 
 
 class FactorialDynamicalModel(DynamicalModel):

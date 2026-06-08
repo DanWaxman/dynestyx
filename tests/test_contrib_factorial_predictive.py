@@ -6,6 +6,7 @@ import numpy as np
 import numpyro.distributions as dist
 
 from dynestyx import (
+    BivariateNegativeBinomialScoreObservation,
     BivariatePoissonScoreObservation,
     FactorialDynamicalModel,
     FactorialEKFConfig,
@@ -139,5 +140,37 @@ def test_score_predictive():
     assert jnp.allclose(out["wdl"].sum(-1), 1.0, atol=1e-5)
     assert jnp.all(jnp.isfinite(out["score_logprob"]))
     # scores -> outcomes: [2,1]->home(1), [0,0]->draw(0), [3,1]->home(1), [1,2]->away(2)
+    assert list(np.asarray(out["outcomes"])) == [1, 0, 1, 2]
+    assert split_nll(out["wdl"], out["outcomes"], split_index=2)["test_nll"] > 0.0
+
+
+def test_score_predictive_negative_binomial():
+    """The overdispersed NB scoreline observation works in the same predictive path."""
+    model = FactorialDynamicalModel(
+        initial_condition=dist.MultivariateNormal(jnp.zeros(2), 0.4 * jnp.eye(2)),
+        state_evolution=RandomWalkEvolution(
+            tau=jnp.array([0.3, 0.3]), factor_state_dim=2
+        ),
+        observation_model=BivariateNegativeBinomialScoreObservation(
+            alpha=0.2, log_dispersion=float(jnp.log(6.0)), factor_state_dim=2
+        ),
+        num_factors=F,
+        num_local_factors=2,
+        t0=0.0,
+    )
+    scores = jnp.array([[2, 1], [0, 0], [3, 1], [1, 2]])
+    out = score_predictive(
+        model,
+        FactorialEKFConfig(),
+        obs_times=OBS_TIMES,
+        obs_values=scores,
+        obs_factor_indices=IDX,
+        key=jax.random.PRNGKey(0),
+        n_samples=400,
+        max_goals_grid=8,
+    )
+    assert out["wdl"].shape == (4, 3)
+    assert jnp.allclose(out["wdl"].sum(-1), 1.0, atol=1e-5)
+    assert jnp.all(jnp.isfinite(out["score_logprob"]))
     assert list(np.asarray(out["outcomes"])) == [1, 0, 1, 2]
     assert split_nll(out["wdl"], out["outcomes"], split_index=2)["test_nll"] > 0.0

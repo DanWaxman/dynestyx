@@ -18,8 +18,9 @@ from dynestyx.models.diffusions import (
     FullDiffusion,
     ScalarDiffusion,
 )
-from dynestyx.models.distributions import BivariatePoisson
+from dynestyx.models.distributions import BivariateNegativeBinomial, BivariatePoisson
 from dynestyx.models.factorial import (
+    BivariateNegativeBinomialScoreObservation,
     BivariatePoissonScoreObservation,
     FactorialDynamicalModel,
     MatchOutcomeObservation,
@@ -48,6 +49,8 @@ __all__ = [
     "Diffusion",
     "DiscreteTimeStateEvolution",
     "DiagonalDiffusion",
+    "BivariateNegativeBinomial",
+    "BivariateNegativeBinomialScoreObservation",
     "BivariatePoisson",
     "BivariatePoissonScoreObservation",
     "DynamicalModel",
