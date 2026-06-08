@@ -46,6 +46,9 @@ nav:
       - Continuous-time LTI profile likelihood: deep_dives/continuous_time_lti_profile_likelihood.ipynb
       - GP prior on drift (FitzHugh-Nagumo): deep_dives/gp_drift.ipynb
       - Factorial models for World Cup skill rating: deep_dives/factorial_world_cup.ipynb
+      - Reproducing Duffield et al. (tennis WTA): deep_dives/duffield_tennis_wta.ipynb
+      - Reproducing Duffield et al. (chess): deep_dives/duffield_chess.ipynb
+      - Reproducing Duffield et al. (football EPL): deep_dives/duffield_football_epl.ipynb
   - API Reference:
     - api_reference/index.md
     - Public API:
