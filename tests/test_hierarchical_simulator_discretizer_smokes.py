@@ -221,7 +221,11 @@ def _plate_nonlinear_discrete_model(
         )
 
 
-def _make_obs_values(shape, dtype=jnp.float32):
+def _make_obs_values(shape, dtype=None):
+    # Use JAX's active default float (float64 under x64, which the suite enables) so
+    # obs_values match the dtype of obs_times/predict_times. Hard-coding float32 here
+    # mismatches float64 times under x64 and trips tfp's strict dtype checks in the
+    # HMM/DPF rollout paths.
     return jnp.zeros(shape, dtype=dtype)
 
 

@@ -23,9 +23,12 @@ NUM_WARMUP = 1
 
 @pytest.fixture(scope="module", autouse=True)
 def config():
+    # x64 is enabled globally in conftest.py and is required here. Do NOT reset it
+    # to False on teardown: under pytest-xdist (`-n auto`) the global flag is shared
+    # within a worker, so resetting it leaks into other test modules running in the
+    # same worker and breaks tests that require 64-bit precision.
     jax.config.update("jax_enable_x64", True)
     yield
-    jax.config.update("jax_enable_x64", False)
 
 
 def test_discrete_time_l63_taylor_kf_mcmc_smoke(

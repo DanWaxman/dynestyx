@@ -2,6 +2,18 @@
 
 import sys
 
+# The test suite is written for 64-bit precision: ~26 test modules enable x64 at
+# module level and several core tests require it (64-bit ``result_shape_dtypes``,
+# float64 dtypes). Setting it here in the root conftest -- before any test module
+# is collected, in every ``pytest-xdist`` worker -- makes the global flag
+# deterministic and avoids order-dependent x64 state leaking across modules under
+# ``pytest -n auto`` (otherwise a worker may run an x64-needing test before any
+# x64-enabling module is imported, raising e.g. "result_shape_dtypes cannot
+# specify 64-bit types when jax_enable_x64 is disabled").
+import jax
+
+jax.config.update("jax_enable_x64", True)
+
 # typeguard 2.13.3 calls evaluate_forwardref(ref, globalns, localns, frozenset())
 # passing recursive_guard positionally.  Python 3.12 made recursive_guard a
 # keyword-only argument, so that call raises TypeError.  We patch the
