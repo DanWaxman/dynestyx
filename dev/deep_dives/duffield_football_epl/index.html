@@ -1595,6 +1595,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#part-c-overdispersed-alternative-bivariate-negative-binomial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — overdispersed alternative: bivariate negative binomial
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4936,6 +4947,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">FactorialDynamicalModel</span><span class="p">,</span> <span class="n">MatchOutcomeObservation</span><span class="p">,</span> <span class="n">BivariatePoissonScoreObservation</span><span class="p">,</span>
+    <span class="n">BivariateNegativeBinomialScoreObservation</span><span class="p">,</span>
     <span class="n">RandomWalkEvolution</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dynestyx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dsx</span>
@@ -4957,6 +4969,7 @@ jax.config.update("jax_enable_x64", True)
 
 from dynestyx import (
     FactorialDynamicalModel, MatchOutcomeObservation, BivariatePoissonScoreObservation,
+    BivariateNegativeBinomialScoreObservation,
     RandomWalkEvolution, FactorialEKFConfig, FactorialPFConfig,
 )
 import dynestyx as dsx
@@ -5577,6 +5590,127 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ce4bef71">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="part-c-overdispersed-alternative-bivariate-negative-binomial">Part C — overdispersed alternative: bivariate negative binomial<a class="anchor-link" href="#part-c-overdispersed-alternative-bivariate-negative-binomial">¶</a></h3><p>Goal counts can be <strong>overdispersed</strong> (variance &gt; mean), which the Poisson cannot capture. <code>BivariateNegativeBinomialScoreObservation</code> keeps the same attack/defense mean rates but makes each scoreline margin a <strong>negative binomial</strong> with a learnable dispersion $r$ (variance $\lambda + \lambda^2/r$; $r\to\infty$ is the Poisson). The two scores are modelled <strong>independent</strong> (no $\lambda_3$ term — EPL scorelines are near-uncorrelated), so $r$ captures overdispersion alone. We fit $(\alpha, h, \log\tau, \log r)$ on the training set with the same PF+Adam objective and score the held-out W/D/L NLL.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c1c6634d">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">bp_model_nb</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">home_adv</span><span class="p">,</span> <span class="n">log_tau</span><span class="p">,</span> <span class="n">log_disp</span><span class="p">,</span> <span class="n">init_cov</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">FactorialDynamicalModel</span><span class="p">(</span>
+        <span class="n">initial_condition</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">init_cov</span><span class="p">),</span>
+        <span class="n">state_evolution</span><span class="o">=</span><span class="n">RandomWalkEvolution</span><span class="p">(</span><span class="n">tau</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_tau</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">factor_state_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="n">observation_model</span><span class="o">=</span><span class="n">BivariateNegativeBinomialScoreObservation</span><span class="p">(</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">home_advantage</span><span class="o">=</span><span class="n">home_adv</span><span class="p">,</span> <span class="n">log_dispersion</span><span class="o">=</span><span class="n">log_disp</span><span class="p">,</span> <span class="n">factor_state_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="n">num_factors</span><span class="o">=</span><span class="n">n_teams</span><span class="p">,</span> <span class="n">num_local_factors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">neg_train_ll_nb</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="n">alpha</span><span class="p">,</span> <span class="n">home_adv</span><span class="p">,</span> <span class="n">log_tau</span><span class="p">,</span> <span class="n">log_disp</span> <span class="o">=</span> <span class="n">theta</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">bp_model_nb</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">home_adv</span><span class="p">,</span> <span class="n">log_tau</span><span class="p">,</span> <span class="n">log_disp</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">)</span>
+    <span class="n">ll</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">compute_factorial_filter</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span> <span class="n">key0</span><span class="p">,</span>
+                                      <span class="n">obs_times</span><span class="o">=</span><span class="n">train_t</span><span class="p">,</span> <span class="n">obs_values</span><span class="o">=</span><span class="n">train_g</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">train_i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">ll</span> <span class="o">/</span> <span class="n">train_t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">theta_nb</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">8.0</span><span class="p">)])</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="mf">0.05</span><span class="p">);</span> <span class="n">state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">theta_nb</span><span class="p">);</span> <span class="n">vg_nb</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">neg_train_ll_nb</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">loss</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="n">vg_nb</span><span class="p">(</span><span class="n">theta_nb</span><span class="p">);</span> <span class="n">upd</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">state</span><span class="p">);</span> <span class="n">theta_nb</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">theta_nb</span><span class="p">,</span> <span class="n">upd</span><span class="p">)</span>
+<span class="n">a_nb</span><span class="p">,</span> <span class="n">h_nb</span><span class="p">,</span> <span class="n">tau_nb</span><span class="p">,</span> <span class="n">r_nb</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">theta_nb</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">theta_nb</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">theta_nb</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">theta_nb</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+<span class="n">m_nb</span> <span class="o">=</span> <span class="n">bp_model_nb</span><span class="p">(</span><span class="n">a_nb</span><span class="p">,</span> <span class="n">h_nb</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tau_nb</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r_nb</span><span class="p">),</span> <span class="n">EXKF_init_cov</span><span class="p">)</span>
+<span class="n">out_nb</span> <span class="o">=</span> <span class="n">score_predictive</span><span class="p">(</span><span class="n">m_nb</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span> <span class="n">obs_times</span><span class="o">=</span><span class="n">match_times</span><span class="p">,</span>
+                          <span class="n">obs_values</span><span class="o">=</span><span class="n">match_goals</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">match_idx</span><span class="p">,</span>
+                          <span class="n">key</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">max_goals_grid</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">r_nb_res</span> <span class="o">=</span> <span class="n">split_nll</span><span class="p">(</span><span class="n">out_nb</span><span class="p">[</span><span class="s1">'wdl'</span><span class="p">],</span> <span class="n">out_nb</span><span class="p">[</span><span class="s1">'outcomes'</span><span class="p">],</span> <span class="n">test_start</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'NB self-fit: alpha=</span><span class="si">{</span><span class="n">a_nb</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">, home_adv=</span><span class="si">{</span><span class="n">h_nb</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">, tau=</span><span class="si">{</span><span class="n">tau_nb</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">, dispersion r=</span><span class="si">{</span><span class="n">r_nb</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">'</span>
+      <span class="sa">f</span><span class="s1">'  (variance/mean at lambda=1.4: </span><span class="si">{</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.4</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">r_nb</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'held-out W/D/L test NLL:  Poisson </span><span class="si">{</span><span class="n">r_fit</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">   '</span>
+      <span class="sa">f</span><span class="s1">'Negative-Binomial </span><span class="si">{</span><span class="n">r_nb_res</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">   (Duffield 0.954)'</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-7">def bp_model_nb(alpha, home_adv, log_tau, log_disp, init_cov, t0=0.0):
+    return FactorialDynamicalModel(
+        initial_condition=dist.MultivariateNormal(jnp.zeros(2), init_cov),
+        state_evolution=RandomWalkEvolution(tau=jnp.exp(log_tau) * jnp.ones(2), factor_state_dim=2),
+        observation_model=BivariateNegativeBinomialScoreObservation(
+            alpha=alpha, home_advantage=home_adv, log_dispersion=log_disp, factor_state_dim=2),
+        num_factors=n_teams, num_local_factors=2, t0=t0)
+
+def neg_train_ll_nb(theta):
+    alpha, home_adv, log_tau, log_disp = theta
+    m = bp_model_nb(alpha, home_adv, log_tau, log_disp, EXKF_init_cov)
+    ll, *_ = compute_factorial_filter(m, FactorialPFConfig(n_particles=150), key0,
+                                      obs_times=train_t, obs_values=train_g, obs_factor_indices=train_i)
+    return -ll / train_t.shape[0]
+
+theta_nb = jnp.array([0.1, 0.15, jnp.log(0.01), jnp.log(8.0)])
+opt = optax.adam(0.05); state = opt.init(theta_nb); vg_nb = jax.jit(jax.value_and_grad(neg_train_ll_nb))
+for _ in range(20):
+    loss, g = vg_nb(theta_nb); upd, state = opt.update(g, state); theta_nb = optax.apply_updates(theta_nb, upd)
+a_nb, h_nb, tau_nb, r_nb = float(theta_nb[0]), float(theta_nb[1]), float(jnp.exp(theta_nb[2])), float(jnp.exp(theta_nb[3]))
+
+m_nb = bp_model_nb(a_nb, h_nb, jnp.log(tau_nb), jnp.log(r_nb), EXKF_init_cov)
+out_nb = score_predictive(m_nb, FactorialPFConfig(n_particles=1000), obs_times=match_times,
+                          obs_values=match_goals, obs_factor_indices=match_idx,
+                          key=jax.random.PRNGKey(0), n_samples=400, max_goals_grid=7)
+r_nb_res = split_nll(out_nb['wdl'], out_nb['outcomes'], test_start)
+print(f'NB self-fit: alpha={a_nb:.3f}, home_adv={h_nb:.3f}, tau={tau_nb:.4f}, dispersion r={r_nb:.1f}'
+      f'  (variance/mean at lambda=1.4: {1 + 1.4 / r_nb:.2f})')
+print(f'held-out W/D/L test NLL:  Poisson {r_fit["test_nll"]:.3f}   '
+      f'Negative-Binomial {r_nb_res["test_nll"]:.3f}   (Duffield 0.954)')</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>NB self-fit: alpha=0.138, home_adv=0.152, tau=0.0044, dispersion r=19.5  (variance/mean at lambda=1.4: 1.07)
+held-out W/D/L test NLL:  Poisson 0.949   Negative-Binomial 0.952   (Duffield 0.954)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1bf87e1a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The negative binomial <strong>learns a large dispersion</strong> ($r \approx 20$, i.e. variance/mean $\approx 1.07$): EPL goals are only <em>mildly</em> overdispersed, so the NB collapses toward the Poisson and its held-out W/D/L NLL (~0.95) matches the Poisson's — overdispersion neither helps nor hurts here, exactly as it should when the counts are close to Poisson (the NB nests the Poisson at $r\to\infty$). The value of the NB shows up on genuinely overdispersed data; the World Cup scoreline comparison in the <a href="factorial_variational_training.ipynb">variational-training notebook</a> fits the same model under VI and reports the learned dispersion there.</p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4676bc06">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -5596,7 +5730,7 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 <div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5639,7 +5773,7 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"year"</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-7">m = bp_model(EXKF_ab[1], EXKF_ab[2], EXKF_ab[0] - EXKF_ab[1], 0.00975808, EXKF_init_cov, t0=None)
+<div class="clipboard-copy-txt" id="cell-8">m = bp_model(EXKF_ab[1], EXKF_ab[2], EXKF_ab[0] - EXKF_ab[1], 0.00975808, EXKF_init_cov, t0=None)
 _traj_times = match_times + jnp.arange(len(match_times)) * 1e-6  # break same-day ties for dsx.sample
 
 
@@ -5697,7 +5831,7 @@ plt.tight_layout(); plt.show()</div>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-9">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5720,7 +5854,7 @@ plt.tight_layout(); plt.show()</div>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted scoreline: </span><span class="si">{</span><span class="n">home</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">away</span><span class="si">}</span><span class="se">\n</span><span class="s2">(actual </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">match_goals</span><span class="p">[</span><span class="n">pick</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">match_goals</span><span class="p">[</span><span class="n">pick</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"probability"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-8"># Predicted scoreline grid for the last fixture between two strong clubs.
+<div class="clipboard-copy-txt" id="cell-9"># Predicted scoreline grid for the last fixture between two strong clubs.
 pick = None
 for k in range(K - 1, -1, -1):
     if id_to_name[int(idx_np[k, 0])] in clubs and id_to_name[int(idx_np[k, 1])] in clubs:
@@ -5769,7 +5903,7 @@ plt.colorbar(im, label="probability"); plt.tight_layout(); plt.show()</div>
 <div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-9">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-10">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5804,7 +5938,7 @@ plt.colorbar(im, label="probability"); plt.tight_layout(); plt.show()</div>
 <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Online scoreline forecasts on held-out matches — W/D/L accuracy </span><span class="si">{</span><span class="n">acc</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-9">grids = np.asarray(bp_online_out["score_grids"])
+<div class="clipboard-copy-txt" id="cell-10">grids = np.asarray(bp_online_out["score_grids"])
 gv = np.arange(grids.shape[-1])
 exp_home = (grids.sum(2) * gv).sum(1)
 exp_away = (grids.sum(1) * gv).sum(1)

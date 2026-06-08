@@ -1590,6 +1590,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#1b-overdispersed-scorelines-bivariate-negative-binomial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1b. Overdispersed scorelines: bivariate negative binomial
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#2-windrawloss-outcome-model-english-premier-league" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4894,10 +4905,12 @@ League, scalar skill).</p>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dynestyx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dsx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">FactorialDynamicalModel</span><span class="p">,</span> <span class="n">BivariatePoissonScoreObservation</span><span class="p">,</span> <span class="n">MatchOutcomeObservation</span><span class="p">,</span>
+    <span class="n">FactorialDynamicalModel</span><span class="p">,</span> <span class="n">BivariatePoissonScoreObservation</span><span class="p">,</span>
+    <span class="n">BivariateNegativeBinomialScoreObservation</span><span class="p">,</span> <span class="n">MatchOutcomeObservation</span><span class="p">,</span>
     <span class="n">RandomWalkEvolution</span><span class="p">,</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx.inference.integrations.cuthbert.factorial_filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_factorial_filter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">score_predictive</span><span class="p">,</span> <span class="n">split_nll</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1">import jax
 import jax.numpy as jnp
@@ -4916,10 +4929,12 @@ from numpyro.infer.initialization import init_to_value
 
 import dynestyx as dsx
 from dynestyx import (
-    FactorialDynamicalModel, BivariatePoissonScoreObservation, MatchOutcomeObservation,
+    FactorialDynamicalModel, BivariatePoissonScoreObservation,
+    BivariateNegativeBinomialScoreObservation, MatchOutcomeObservation,
     RandomWalkEvolution, Filter, FactorialPFConfig, FactorialEKFConfig,
 )
-from dynestyx.inference.integrations.cuthbert.factorial_filter import compute_factorial_filter</div>
+from dynestyx.inference.integrations.cuthbert.factorial_filter import compute_factorial_filter
+from dynestyx.contrib import score_predictive, split_nll</div>
 </div>
 </div>
 </div>
@@ -5685,6 +5700,264 @@ pd.DataFrame({"team": [wc_teams[i] for i in order],
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a3aaf9a1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="1b-overdispersed-scorelines-bivariate-negative-binomial">1b. Overdispersed scorelines: bivariate negative binomial<a class="anchor-link" href="#1b-overdispersed-scorelines-bivariate-negative-binomial">¶</a></h2><p>Goal counts are often <strong>overdispersed</strong> (variance &gt; mean), which the Poisson cannot represent. <code>BivariateNegativeBinomialScoreObservation</code> keeps the same attack/defense mean rates $\lambda_1,\lambda_2$ but makes each margin a <strong>negative binomial</strong> with a shared dispersion $r$ (variance $\lambda + \lambda^2/r$), so VI can <em>learn</em> whether the data wants overdispersion — $r\to\infty$ recovers the Poisson. We model the two scores as <strong>independent</strong> (no shared-goals $\lambda_3=e^\beta$ term): international scorelines are empirically near-uncorrelated (the bivariate Poisson fits $\lambda_3\approx0.01$), so a shared frailty would only inject spurious positive correlation <em>tied to</em> the overdispersion. The model is fit by the same MLE-warm-started <code>AutoMultivariateNormal</code> SVI; the only change is dropping $\beta$ and adding a log-dispersion.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=02670910">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-10">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">make_model_nb</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+    <span class="n">cd</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">'log_chol_diag'</span><span class="p">])</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s1">'chol_offdiag'</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cd</span><span class="p">[</span><span class="mi">1</span><span class="p">]]])</span>
+    <span class="k">return</span> <span class="n">FactorialDynamicalModel</span><span class="p">(</span>
+        <span class="n">initial_condition</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">'mu0'</span><span class="p">],</span> <span class="n">scale_tril</span><span class="o">=</span><span class="n">L</span><span class="p">),</span>
+        <span class="n">state_evolution</span><span class="o">=</span><span class="n">RandomWalkEvolution</span><span class="p">(</span><span class="n">tau</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">'log_tau'</span><span class="p">]),</span> <span class="n">factor_state_dim</span><span class="o">=</span><span class="n">D</span><span class="p">),</span>
+        <span class="n">observation_model</span><span class="o">=</span><span class="n">BivariateNegativeBinomialScoreObservation</span><span class="p">(</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="s1">'alpha'</span><span class="p">],</span> <span class="n">log_dispersion</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="s1">'log_dispersion'</span><span class="p">],</span> <span class="n">factor_state_dim</span><span class="o">=</span><span class="n">D</span><span class="p">),</span>
+        <span class="n">num_factors</span><span class="o">=</span><span class="n">F</span><span class="p">,</span> <span class="n">num_local_factors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">PRIORS_NB</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># same as the Poisson priors but drop beta, add a log-dispersion</span>
+    <span class="s1">'mu0'</span><span class="p">:</span>            <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">to_event</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">'log_chol_diag'</span><span class="p">:</span>  <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="mf">0.7</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">to_event</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">'chol_offdiag'</span><span class="p">:</span>   <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">to_event</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">'log_tau'</span><span class="p">:</span>        <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="mf">0.7</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">to_event</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">'alpha'</span><span class="p">:</span>          <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+    <span class="s1">'log_dispersion'</span><span class="p">:</span> <span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">neg_loglik_nb</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>  <span class="c1"># differentiable PF marginal likelihood, for the MLE warm-start</span>
+    <span class="n">ll</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">compute_factorial_filter</span><span class="p">(</span><span class="n">make_model_nb</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">300</span><span class="p">),</span> <span class="n">OPT_KEY</span><span class="p">,</span>
+                                      <span class="n">obs_times</span><span class="o">=</span><span class="n">obs_times</span><span class="p">,</span> <span class="n">obs_values</span><span class="o">=</span><span class="n">obs_values</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">obs_factor_indices</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">ll</span> <span class="o">/</span> <span class="n">K</span>
+
+<span class="n">vg_nb</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">neg_loglik_nb</span><span class="p">))</span>
+<span class="n">mle_nb</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'mu0'</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="s1">'log_chol_diag'</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])),</span> <span class="s1">'chol_offdiag'</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+          <span class="s1">'log_tau'</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])),</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span> <span class="s1">'log_dispersion'</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">10.0</span><span class="p">))}</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="mf">0.05</span><span class="p">);</span> <span class="n">st</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">mle_nb</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">150</span><span class="p">):</span>
+    <span class="n">loss</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="n">vg_nb</span><span class="p">(</span><span class="n">mle_nb</span><span class="p">);</span> <span class="n">upd</span><span class="p">,</span> <span class="n">st</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">st</span><span class="p">);</span> <span class="n">mle_nb</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">mle_nb</span><span class="p">,</span> <span class="n">upd</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">svi_model_nb</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">prior</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">prior</span> <span class="ow">in</span> <span class="n">PRIORS_NB</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">with</span> <span class="n">Filter</span><span class="p">(</span><span class="n">filter_config</span><span class="o">=</span><span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">crn_seed</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))):</span>
+        <span class="n">dsx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s1">'score'</span><span class="p">,</span> <span class="n">make_model_nb</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">obs_times</span><span class="o">=</span><span class="n">obs_times</span><span class="p">,</span> <span class="n">obs_values</span><span class="o">=</span><span class="n">obs_values</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">obs_factor_indices</span><span class="p">)</span>
+
+<span class="n">guide_nb</span> <span class="o">=</span> <span class="n">AutoMultivariateNormal</span><span class="p">(</span><span class="n">svi_model_nb</span><span class="p">,</span> <span class="n">init_loc_fn</span><span class="o">=</span><span class="n">init_to_value</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">mle_nb</span><span class="p">))</span>
+<span class="n">svi_nb</span> <span class="o">=</span> <span class="n">SVI</span><span class="p">(</span><span class="n">svi_model_nb</span><span class="p">,</span> <span class="n">guide_nb</span><span class="p">,</span> <span class="n">optax</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="mf">0.02</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">Trace_ELBO</span><span class="p">())</span>
+<span class="n">svi_result_nb</span> <span class="o">=</span> <span class="n">svi_nb</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="mi">400</span><span class="p">,</span> <span class="n">progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">post_nb</span> <span class="o">=</span> <span class="n">guide_nb</span><span class="o">.</span><span class="n">sample_posterior</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span> <span class="n">svi_result_nb</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">sample_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,))</span>
+<span class="n">r_post</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">post_nb</span><span class="p">[</span><span class="s1">'log_dispersion'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Poisson ELBO loss </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">svi_result</span><span class="o">.</span><span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">    NB ELBO loss </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">svi_result_nb</span><span class="o">.</span><span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'NB posterior dispersion r = </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">r_post</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> +/- </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">r_post</span><span class="o">.</span><span class="n">std</span><span class="p">())</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">'</span>
+      <span class="sa">f</span><span class="s1">'   (variance/mean at lambda=1.4 is </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.4</span><span class="o">/</span><span class="n">r_post</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">; r-&gt;inf is Poisson)'</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-10">def make_model_nb(p):
+    cd = jnp.exp(p['log_chol_diag'])
+    L = jnp.array([[cd[0], 0.0], [p['chol_offdiag'][0], cd[1]]])
+    return FactorialDynamicalModel(
+        initial_condition=dist.MultivariateNormal(p['mu0'], scale_tril=L),
+        state_evolution=RandomWalkEvolution(tau=jnp.exp(p['log_tau']), factor_state_dim=D),
+        observation_model=BivariateNegativeBinomialScoreObservation(
+            alpha=p['alpha'], log_dispersion=p['log_dispersion'], factor_state_dim=D),
+        num_factors=F, num_local_factors=2, t0=None)
+
+PRIORS_NB = {  # same as the Poisson priors but drop beta, add a log-dispersion
+    'mu0':            dist.Normal(0.0, 1.0).expand([2]).to_event(1),
+    'log_chol_diag':  dist.Normal(jnp.log(0.5), 0.7).expand([2]).to_event(1),
+    'chol_offdiag':   dist.Normal(0.0, 0.5).expand([1]).to_event(1),
+    'log_tau':        dist.Normal(jnp.log(0.4), 0.7).expand([2]).to_event(1),
+    'alpha':          dist.Normal(0.25, 0.5),
+    'log_dispersion': dist.Normal(jnp.log(10.0), 1.0),
+}
+
+def neg_loglik_nb(p):  # differentiable PF marginal likelihood, for the MLE warm-start
+    ll, *_ = compute_factorial_filter(make_model_nb(p), FactorialPFConfig(n_particles=300), OPT_KEY,
+                                      obs_times=obs_times, obs_values=obs_values, obs_factor_indices=obs_factor_indices)
+    return -ll / K
+
+vg_nb = jax.jit(jax.value_and_grad(neg_loglik_nb))
+mle_nb = {'mu0': jnp.zeros(2), 'log_chol_diag': jnp.log(jnp.array([0.5, 0.5])), 'chol_offdiag': jnp.zeros(1),
+          'log_tau': jnp.log(jnp.array([0.4, 0.4])), 'alpha': jnp.array(0.25), 'log_dispersion': jnp.log(jnp.array(10.0))}
+opt = optax.adam(0.05); st = opt.init(mle_nb)
+for _ in range(150):
+    loss, g = vg_nb(mle_nb); upd, st = opt.update(g, st); mle_nb = optax.apply_updates(mle_nb, upd)
+
+def svi_model_nb():
+    p = {name: numpyro.sample(name, prior) for name, prior in PRIORS_NB.items()}
+    with Filter(filter_config=FactorialPFConfig(n_particles=300, crn_seed=jax.random.PRNGKey(0))):
+        dsx.sample('score', make_model_nb(p), obs_times=obs_times, obs_values=obs_values, obs_factor_indices=obs_factor_indices)
+
+guide_nb = AutoMultivariateNormal(svi_model_nb, init_loc_fn=init_to_value(values=mle_nb))
+svi_nb = SVI(svi_model_nb, guide_nb, optax.adam(0.02), loss=Trace_ELBO())
+svi_result_nb = svi_nb.run(jax.random.PRNGKey(11), 400, progress_bar=False)
+post_nb = guide_nb.sample_posterior(jax.random.PRNGKey(12), svi_result_nb.params, sample_shape=(500,))
+r_post = jnp.exp(post_nb['log_dispersion'])
+print(f'Poisson ELBO loss {float(svi_result.losses[-1]):.1f}    NB ELBO loss {float(svi_result_nb.losses[-1]):.1f}')
+print(f'NB posterior dispersion r = {float(r_post.mean()):.1f} +/- {float(r_post.std()):.1f}'
+      f'   (variance/mean at lambda=1.4 is {float(1 + 1.4/r_post.mean()):.2f}; r-&gt;inf is Poisson)')</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Poisson ELBO loss 3818.8    NB ELBO loss 3827.4
+NB posterior dispersion r = 54.1 +/- 29.6   (variance/mean at lambda=1.4 is 1.03; r-&gt;inf is Poisson)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8e152c77">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-11">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Held-out scoreline prediction (last 20% of matches, one-step-ahead) at each posterior mean.</span>
+<span class="n">test_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">heldout_nlls</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">score_predictive</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span> <span class="n">obs_times</span><span class="o">=</span><span class="n">obs_times</span><span class="p">,</span>
+                           <span class="n">obs_values</span><span class="o">=</span><span class="n">obs_values</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">obs_factor_indices</span><span class="p">,</span>
+                           <span class="n">key</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">max_goals_grid</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">'model'</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+            <span class="s1">'scoreline NLL'</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">'score_logprob'</span><span class="p">][</span><span class="n">test_start</span><span class="p">:])),</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="s1">'W/D/L NLL'</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">split_nll</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s1">'wdl'</span><span class="p">],</span> <span class="n">out</span><span class="p">[</span><span class="s1">'outcomes'</span><span class="p">],</span> <span class="n">test_start</span><span class="p">)[</span><span class="s1">'test_nll'</span><span class="p">],</span> <span class="mi">3</span><span class="p">)}</span>
+
+<span class="n">post_mean_pois</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">post</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">post</span><span class="p">}</span>
+<span class="n">post_mean_nb</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">post_nb</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">post_nb</span><span class="p">}</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span>
+    <span class="n">heldout_nlls</span><span class="p">(</span><span class="n">make_model</span><span class="p">(</span><span class="n">post_mean_pois</span><span class="p">),</span> <span class="s1">'Bivariate Poisson'</span><span class="p">),</span>
+    <span class="n">heldout_nlls</span><span class="p">(</span><span class="n">make_model_nb</span><span class="p">(</span><span class="n">post_mean_nb</span><span class="p">),</span> <span class="s1">'Bivariate Neg-Binomial'</span><span class="p">),</span>
+<span class="p">])</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-11"># Held-out scoreline prediction (last 20% of matches, one-step-ahead) at each posterior mean.
+test_start = int(0.8 * K)
+
+def heldout_nlls(model, label):
+    out = score_predictive(model, FactorialPFConfig(n_particles=1000), obs_times=obs_times,
+                           obs_values=obs_values, obs_factor_indices=obs_factor_indices,
+                           key=jax.random.PRNGKey(0), n_samples=400, max_goals_grid=7)
+    return {'model': label,
+            'scoreline NLL': round(float(-jnp.mean(out['score_logprob'][test_start:])), 3),
+            'W/D/L NLL': round(split_nll(out['wdl'], out['outcomes'], test_start)['test_nll'], 3)}
+
+post_mean_pois = {k: post[k].mean(0) for k in post}
+post_mean_nb = {k: post_nb[k].mean(0) for k in post_nb}
+pd.DataFrame([
+    heldout_nlls(make_model(post_mean_pois), 'Bivariate Poisson'),
+    heldout_nlls(make_model_nb(post_mean_nb), 'Bivariate Neg-Binomial'),
+])</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>model</th>
+<th>scoreline NLL</th>
+<th>W/D/L NLL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>Bivariate Poisson</td>
+<td>2.910</td>
+<td>1.015</td>
+</tr>
+<tr>
+<th>1</th>
+<td>Bivariate Neg-Binomial</td>
+<td>2.907</td>
+<td>1.018</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8da02913">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The learned dispersion is <strong>large</strong> ($r \approx 54$, variance/mean $\approx 1.03$): these international scorelines are essentially Poisson, so the negative binomial collapses toward it and the held-out scoreline / W-D-L NLLs sit within noise of the Poisson. Overdispersion is not needed here — but because the NB <strong>nests</strong> the Poisson ($r\to\infty$), allowing it costs nothing, and it would pay off on genuinely overdispersed counts. The same <code>BivariateNegativeBinomial</code> drops into the EPL benchmark in the <a href="duffield_football_epl.ipynb">football notebook</a>, which likewise learns a large $r$.</p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=33a2b21d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -5705,10 +5978,10 @@ values and evaluate the held-out NLL.</p>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-10">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-12">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5747,7 +6020,7 @@ values and evaluate the held-out NLL.</p>
 <span class="n">e_test_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">e_times</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">365</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"EPL: </span><span class="si">{</span><span class="n">e_K</span><span class="si">}</span><span class="s2"> matches, </span><span class="si">{</span><span class="n">n_teams</span><span class="si">}</span><span class="s2"> teams, train </span><span class="si">{</span><span class="n">e_test_start</span><span class="si">}</span><span class="s2"> / test </span><span class="si">{</span><span class="n">e_K</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">e_test_start</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-10">import io, time, urllib.request
+<div class="clipboard-copy-txt" id="cell-12">import io, time, urllib.request
 def fetch_csv(url, tries=5):
     for t in range(tries):
         try:
@@ -5799,10 +6072,10 @@ print(f"EPL: {e_K} matches, {n_teams} teams, train {e_test_start} / test {e_K - 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-11">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-13">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5836,7 +6109,7 @@ print(f"EPL: {e_K} matches, {n_teams} teams, train {e_test_start} / test {e_K - 
 <span class="n">e_post</span> <span class="o">=</span> <span class="n">e_guide</span><span class="o">.</span><span class="n">sample_posterior</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">e_res</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">sample_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,))</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ELBO loss: </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">e_res</span><span class="o">.</span><span class="n">losses</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">e_res</span><span class="o">.</span><span class="n">losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-11">def outcome_model(p):
+<div class="clipboard-copy-txt" id="cell-13">def outcome_model(p):
     return FactorialDynamicalModel(
         initial_condition=dist.MultivariateNormal(jnp.zeros(1), jnp.exp(p["log_init_var"]) * jnp.eye(1)),
         state_evolution=RandomWalkEvolution(tau=jnp.exp(p["log_tau"]), factor_state_dim=1),
@@ -5883,10 +6156,10 @@ print(f"ELBO loss: {float(e_res.losses[0]):.1f} -&gt; {float(e_res.losses[-1]):.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-12">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-14">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5908,7 +6181,7 @@ print(f"ELBO loss: {float(e_res.losses[0]):.1f} -&gt; {float(e_res.losses[-1]):.
     <span class="s2">"Duffield (EM)"</span><span class="p">:</span>      <span class="p">[</span><span class="mf">0.13117045</span><span class="p">,</span> <span class="mf">0.00100004</span><span class="p">,</span> <span class="mf">0.4741553</span><span class="p">],</span>
 <span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-12"># Posterior vs Duffield et al.'s EM-fitted EPL outcome parameters.
+<div class="clipboard-copy-txt" id="cell-14"># Posterior vs Duffield et al.'s EM-fitted EPL outcome parameters.
 pd.DataFrame({
     "parameter": ["init_var", "tau", "epsilon"],
     "SVI posterior mean": [float(jnp.exp(e_post["log_init_var"]).mean()),
@@ -5928,7 +6201,7 @@ pd.DataFrame({
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -6002,10 +6275,10 @@ pd.DataFrame({
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-13">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-15">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -6023,7 +6296,7 @@ pd.DataFrame({
 <span class="n">nll</span> <span class="o">=</span> <span class="n">split_nll</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">e_out</span><span class="p">,</span> <span class="n">e_test_start</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"held-out test NLL at the SVI posterior mean: </span><span class="si">{</span><span class="n">nll</span><span class="p">[</span><span class="s1">'test_nll'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  (Duffield test 0.965 ExKF, 0.961 best)"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-13">from dynestyx.contrib import outcome_predictive_probs, split_nll
+<div class="clipboard-copy-txt" id="cell-15">from dynestyx.contrib import outcome_predictive_probs, split_nll
 e_mean = {k: e_post[k].mean(0) for k in e_post}
 pp = outcome_predictive_probs(outcome_model(e_mean), FactorialPFConfig(n_particles=1000),
                               obs_times=e_times, obs_values=e_out, obs_factor_indices=e_idx,
