@@ -18,7 +18,7 @@
         <link rel="prev" href="../duffield_chess/">
       
       
-        <link rel="next" href="../../api_reference/">
+        <link rel="next" href="../factorial_variational_training/">
       
       
         
@@ -1637,6 +1637,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../factorial_variational_training/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Variational training of factorial models with SVI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -4910,6 +4938,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <span class="n">FactorialDynamicalModel</span><span class="p">,</span> <span class="n">MatchOutcomeObservation</span><span class="p">,</span> <span class="n">BivariatePoissonScoreObservation</span><span class="p">,</span>
     <span class="n">RandomWalkEvolution</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dynestyx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dsx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx</span><span class="w"> </span><span class="kn">import</span> <span class="n">Filter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpyro.infer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Predictive</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx.inference.integrations.cuthbert.factorial_filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_factorial_filter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">outcome_predictive_probs</span><span class="p">,</span> <span class="n">score_predictive</span><span class="p">,</span> <span class="n">split_nll</span>
 </pre></div>
@@ -4928,6 +4959,9 @@ from dynestyx import (
     FactorialDynamicalModel, MatchOutcomeObservation, BivariatePoissonScoreObservation,
     RandomWalkEvolution, FactorialEKFConfig, FactorialPFConfig,
 )
+import dynestyx as dsx
+from dynestyx import Filter
+from numpyro.infer import Predictive
 from dynestyx.inference.integrations.cuthbert.factorial_filter import compute_factorial_filter
 from dynestyx.contrib import outcome_predictive_probs, score_predictive, split_nll</div>
 </div>
@@ -5307,13 +5341,13 @@ print(f"  validation NLL {best[0]:.3f}   test NLL {best[1]:.3f}   (Duffield test
 <span class="n">SMC_init_cov</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.15524219</span><span class="p">,</span> <span class="mf">0.15524219</span><span class="p">]))</span>
 <span class="n">SMC_ab</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.8762023</span><span class="p">,</span> <span class="mf">0.7193458</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.8617427</span><span class="p">)</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">bp_model</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">home_adv</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">init_cov</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bp_model</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">home_adv</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">init_cov</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">FactorialDynamicalModel</span><span class="p">(</span>
         <span class="n">initial_condition</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">MultivariateNormal</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">init_cov</span><span class="p">),</span>
         <span class="n">state_evolution</span><span class="o">=</span><span class="n">RandomWalkEvolution</span><span class="p">(</span><span class="n">tau</span><span class="o">=</span><span class="n">tau</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">factor_state_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
         <span class="n">observation_model</span><span class="o">=</span><span class="n">BivariatePoissonScoreObservation</span><span class="p">(</span>
             <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">home_advantage</span><span class="o">=</span><span class="n">home_adv</span><span class="p">,</span> <span class="n">factor_state_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_goals</span><span class="o">=</span><span class="mi">9</span><span class="p">),</span>
-        <span class="n">num_factors</span><span class="o">=</span><span class="n">n_teams</span><span class="p">,</span> <span class="n">num_local_factors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">num_factors</span><span class="o">=</span><span class="n">n_teams</span><span class="p">,</span> <span class="n">num_local_factors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">bp_wdl_nll</span><span class="p">(</span><span class="n">alpha_h</span><span class="p">,</span> <span class="n">alpha_a</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">init_cov</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">400</span><span class="p">):</span>
@@ -5336,13 +5370,13 @@ EXKF_ab = (0.26348755, 0.10862826, -4.4856677)   # (alpha_h, alpha_a, beta)
 SMC_init_cov = jnp.diag(jnp.array([0.15524219, 0.15524219]))
 SMC_ab = (0.8762023, 0.7193458, -3.8617427)
 
-def bp_model(alpha, beta, home_adv, tau, init_cov):
+def bp_model(alpha, beta, home_adv, tau, init_cov, t0=0.0):
     return FactorialDynamicalModel(
         initial_condition=dist.MultivariateNormal(jnp.zeros(2), init_cov),
         state_evolution=RandomWalkEvolution(tau=tau * jnp.ones(2), factor_state_dim=2),
         observation_model=BivariatePoissonScoreObservation(
             alpha=alpha, beta=beta, home_advantage=home_adv, factor_state_dim=2, max_goals=9),
-        num_factors=n_teams, num_local_factors=2, t0=0.0,
+        num_factors=n_teams, num_local_factors=2, t0=t0,
     )
 
 def bp_wdl_nll(alpha_h, alpha_a, beta, tau, init_cov, config, key, n_samples=400):
@@ -5572,11 +5606,18 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">bp_model</span><span class="p">(</span><span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.00975808</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">)</span>
-<span class="n">_</span><span class="p">,</span> <span class="n">final_state</span><span class="p">,</span> <span class="n">local_seq</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_factorial_filter</span><span class="p">(</span>
-    <span class="n">m</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">(),</span> <span class="kc">None</span><span class="p">,</span> <span class="n">obs_times</span><span class="o">=</span><span class="n">match_times</span><span class="p">,</span>
-    <span class="n">obs_values</span><span class="o">=</span><span class="n">match_goals</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">match_idx</span><span class="p">)</span>
-<span class="n">local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">local_seq</span><span class="o">.</span><span class="n">elem</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>  <span class="c1"># (K, 2, 2) -&gt; [slot][att,def]</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">bp_model</span><span class="p">(</span><span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.00975808</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">_traj_times</span> <span class="o">=</span> <span class="n">match_times</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">match_times</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1e-6</span>  <span class="c1"># break same-day ties for dsx.sample</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_filter_program</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">Filter</span><span class="p">(</span><span class="n">filter_config</span><span class="o">=</span><span class="n">FactorialEKFConfig</span><span class="p">(</span><span class="n">record_filtered_states_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+        <span class="n">dsx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">"skill"</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">obs_times</span><span class="o">=</span><span class="n">_traj_times</span><span class="p">,</span> <span class="n">obs_values</span><span class="o">=</span><span class="n">match_goals</span><span class="p">,</span>
+                   <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">match_idx</span><span class="p">)</span>
+
+
+<span class="n">_pr</span> <span class="o">=</span> <span class="n">Predictive</span><span class="p">(</span><span class="n">_filter_program</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">_pr</span><span class="p">[</span><span class="s2">"skill_filtered_local_states_mean"</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># (K, 2, 2) -&gt; [slot][att, def]</span>
 <span class="n">idx_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">match_idx</span><span class="p">);</span> <span class="n">yr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">match_times</span><span class="p">)</span> <span class="o">/</span> <span class="mf">365.25</span> <span class="o">+</span> <span class="mf">2018.6</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">team_traj</span><span class="p">(</span><span class="n">team</span><span class="p">):</span>
@@ -5598,11 +5639,18 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"year"</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-7">m = bp_model(EXKF_ab[1], EXKF_ab[2], EXKF_ab[0] - EXKF_ab[1], 0.00975808, EXKF_init_cov)
-_, final_state, local_seq, _ = compute_factorial_filter(
-    m, FactorialEKFConfig(), None, obs_times=match_times,
-    obs_values=match_goals, obs_factor_indices=match_idx)
-local = np.asarray(local_seq.elem.b)  # (K, 2, 2) -&gt; [slot][att,def]
+<div class="clipboard-copy-txt" id="cell-7">m = bp_model(EXKF_ab[1], EXKF_ab[2], EXKF_ab[0] - EXKF_ab[1], 0.00975808, EXKF_init_cov, t0=None)
+_traj_times = match_times + jnp.arange(len(match_times)) * 1e-6  # break same-day ties for dsx.sample
+
+
+def _filter_program():
+    with Filter(filter_config=FactorialEKFConfig(record_filtered_states_mean=True)):
+        dsx.sample("skill", m, obs_times=_traj_times, obs_values=match_goals,
+                   obs_factor_indices=match_idx)
+
+
+_pr = Predictive(_filter_program, num_samples=1)(jax.random.PRNGKey(0))
+local = np.asarray(_pr["skill_filtered_local_states_mean"][0])  # (K, 2, 2) -&gt; [slot][att, def]
 idx_np = np.asarray(match_idx); yr = np.asarray(match_times) / 365.25 + 2018.6
 
 def team_traj(team):
