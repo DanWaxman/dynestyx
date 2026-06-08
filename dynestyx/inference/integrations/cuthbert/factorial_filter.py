@@ -61,6 +61,7 @@ class FactorialCuthbertInputs(NamedTuple):
     time: jax.Array  # (K,) — match time
     time_prev: jax.Array  # (K, n_local) — per-factor previous-match time
     y: jax.Array  # (K, ...) — match outcome
+    u: jax.Array  # (K, control_dim) — per-match covariates passed to the observation
 
 
 def _get_factorial_indices(mi: FactorialCuthbertInputs) -> jax.Array:
@@ -104,9 +105,15 @@ def _build_factorial_inputs(
     obs_times: jax.Array,
     obs_values: jax.Array,
     obs_factor_indices: jax.Array,
+    obs_controls: jax.Array | None = None,
 ):
     obs_times = jnp.asarray(obs_times)
     obs_factor_indices = jnp.asarray(obs_factor_indices).astype(jnp.int32)
+    K = obs_times.shape[0]
+    if obs_controls is None:
+        u = jnp.zeros((K, 0), dtype=obs_times.dtype)
+    else:
+        u = jnp.asarray(obs_controls, dtype=obs_times.dtype).reshape(K, -1)
     t0 = dynamics.t0 if dynamics.t0 is not None else obs_times[0]
     time_prev, last_time = _compute_time_prev_and_last(
         obs_times,
@@ -119,6 +126,7 @@ def _build_factorial_inputs(
         time=obs_times,
         time_prev=time_prev,
         y=jnp.asarray(obs_values),
+        u=u,
     )
     return mi, last_time
 
@@ -243,8 +251,10 @@ def _factorial_taylor_filter(dynamics: FactorialDynamicalModel, filter_kwargs: d
         return dynamics_log_density, x_prev_lin, x_lin
 
     def get_observation_func(state: LinearizedKalmanFilterState, mi):
+        u = mi.u if mi.u.shape[-1] > 0 else None
+
         def log_potential(x):
-            edist = dynamics.observation_model(x, None, mi.time)
+            edist = dynamics.observation_model(x, u, mi.time)
             return jnp.asarray(edist.log_prob(mi.y)).sum()
 
         return log_potential, jnp.atleast_1d(jnp.asarray(state.mean))
@@ -301,8 +311,9 @@ def _factorial_kalman_filter(dynamics: FactorialDynamicalModel, filter_kwargs: d
         return _block_diag(Fs), jnp.concatenate(cs), _block_diag(Qs)
 
     def get_observation_params(mi):
+        u = mi.u if mi.u.shape[-1] > 0 else None
         x0 = jnp.zeros((joint,))
-        od = dynamics.observation_model(x0, None, mi.time)
+        od = dynamics.observation_model(x0, u, mi.time)
         if not hasattr(od, "covariance_matrix"):
             raise TypeError(
                 "FactorialKFConfig requires a linear-Gaussian observation model "
@@ -312,7 +323,7 @@ def _factorial_kalman_filter(dynamics: FactorialDynamicalModel, filter_kwargs: d
             )
 
         def mean_fn(x):
-            return dynamics.observation_model(x, None, mi.time).mean
+            return dynamics.observation_model(x, u, mi.time).mean
 
         H = jax.jacobian(mean_fn)(x0)
         dvec = jnp.asarray(od.mean) - H @ x0
@@ -385,7 +396,8 @@ def _factorial_pf_objects(dynamics: FactorialDynamicalModel, filter_kwargs: dict
         return jnp.concatenate([per_factor(j) for j in range(n_local)])
 
     def log_potential(x_prev, x, mi):
-        edist = dynamics.observation_model(x, None, mi.time)
+        u = mi.u if mi.u.shape[-1] > 0 else None
+        edist = dynamics.observation_model(x, u, mi.time)
         return jnp.asarray(edist.log_prob(mi.y)).sum()
 
     base_method = filter_kwargs.get("resampling_base_method", "systematic")
@@ -462,6 +474,7 @@ def compute_factorial_filter(
     obs_times: jax.Array,
     obs_values: jax.Array,
     obs_factor_indices: jax.Array,
+    obs_controls: jax.Array | None = None,
 ):
     """Pure-JAX factorial filter (no NumPyro side-effects).
 
@@ -478,7 +491,7 @@ def compute_factorial_filter(
         )
 
     model_inputs, last_time = _build_factorial_inputs(
-        dynamics, obs_times, obs_values, obs_factor_indices
+        dynamics, obs_times, obs_values, obs_factor_indices, obs_controls
     )
     init_mi = jax.tree.map(lambda x: x[0], model_inputs)
 
@@ -616,6 +629,7 @@ def run_factorial_filter(
     obs_times: jax.Array,
     obs_values: jax.Array,
     obs_factor_indices: jax.Array,
+    obs_controls: jax.Array | None = None,
     predict_times: jax.Array | None = None,
     predict_factor_indices: jax.Array | None = None,
     **kwargs,
@@ -634,6 +648,7 @@ def run_factorial_filter(
         obs_times=obs_times,
         obs_values=obs_values,
         obs_factor_indices=obs_factor_indices,
+        obs_controls=obs_controls,
     )
 
     numpyro.factor(f"{name}_marginal_log_likelihood", loglik)

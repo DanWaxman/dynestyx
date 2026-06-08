@@ -111,6 +111,78 @@ class RandomWalkEvolution(DiscreteTimeStateEvolution):
         return dist.MultivariateNormal(loc=x, covariance_matrix=jnp.diag(cov_diag))
 
 
+class OrnsteinUhlenbeckEvolution(DiscreteTimeStateEvolution):
+    r"""Per-factor mean-reverting (Ornstein--Uhlenbeck) skill evolution.
+
+    A stationary alternative to :class:`RandomWalkEvolution`: instead of diffusing
+    without bound, each factor's skill reverts toward a long-run mean $\mu_0$ at rate
+    $r$, with a *stationary* equilibrium variance $\sigma_0^2$. The exact discrete-time
+    OU transition over a gap $\Delta t = t_{k+1} - t_k$ (Duffield et al. 2024, §4.6,
+    "Stationary dynamics") is
+
+    $$
+    x_{t_{k+1}}^f \mid x_{t_k}^f \sim \mathcal N\!\Big(
+        x_{t_k}^f e^{-r\,\Delta t} + \mu_0\,(1 - e^{-r\,\Delta t}),\;
+        \sigma_0^2\,(1 - e^{-2 r\,\Delta t})\,I_d \Big).
+    $$
+
+    Unlike Brownian motion, whose variance grows linearly with elapsed time (so a
+    long gap implies an arbitrarily diffuse prior), the OU variance saturates at
+    $\sigma_0^2$ regardless of the gap, so $\sigma_0$ directly and stably controls the
+    spread of skills. As $r \to 0$ with $2 r \sigma_0^2$ held fixed it recovers the
+    Brownian random walk (rate $\tau^2 = 2 r \sigma_0^2$). The stationary distribution
+    is $\mathcal N(\mu_0, \sigma_0^2 I_d)$, which is the natural initial condition.
+
+    Attributes:
+        reversion_rate (jax.Array): Mean-reversion rate $r > 0$ (scalar or length
+            ``factor_state_dim``). Larger $r$ = faster forgetting of past form.
+        equilibrium_scale (jax.Array): Stationary standard deviation $\sigma_0$
+            (scalar or length ``factor_state_dim``).
+        long_run_mean (jax.Array): Long-run mean $\mu_0$ (scalar or length
+            ``factor_state_dim``); defaults to ``0``.
+        factor_state_dim (int): Per-factor state dimension ``d``.
+    """
+
+    reversion_rate: Float[Array, "*r_shape"]
+    equilibrium_scale: Float[Array, "*scale_shape"]
+    long_run_mean: Float[Array, "*mean_shape"]
+    factor_state_dim: int = eqx.field(static=True)
+
+    def __init__(
+        self,
+        reversion_rate: float | int | Float[Array, "*r_shape"],
+        equilibrium_scale: float | int | Float[Array, "*scale_shape"],
+        long_run_mean: float | int | Float[Array, "*mean_shape"] = 0.0,
+        factor_state_dim: int = 1,
+    ):
+        """
+        Args:
+            reversion_rate: Mean-reversion rate $r > 0$.
+            equilibrium_scale: Stationary standard deviation $\\sigma_0$.
+            long_run_mean: Long-run mean $\\mu_0$ (default ``0``).
+            factor_state_dim: Per-factor state dimension ``d``. Defaults to ``1``.
+        """
+        self.reversion_rate = jnp.asarray(reversion_rate, dtype=float)
+        self.equilibrium_scale = jnp.asarray(equilibrium_scale, dtype=float)
+        self.long_run_mean = jnp.asarray(long_run_mean, dtype=float)
+        self.factor_state_dim = int(factor_state_dim)
+
+    def __call__(self, x, u, t_now, t_next):
+        d = self.factor_state_dim
+        dt = jnp.asarray(t_next, dtype=float) - jnp.asarray(t_now, dtype=float)
+        r = jnp.broadcast_to(jnp.atleast_1d(self.reversion_rate), (d,))
+        sigma2 = jnp.broadcast_to(
+            jnp.atleast_1d(jnp.square(self.equilibrium_scale)), (d,)
+        )
+        mu = jnp.broadcast_to(jnp.atleast_1d(self.long_run_mean), (d,))
+        decay = jnp.exp(-r * dt)
+        loc = x * decay + mu * (1.0 - decay)
+        # Variance saturates at sigma0^2; build the covariance directly (with a
+        # positive floor) so it stays differentiable at dt == 0 (where var == 0).
+        var = sigma2 * (1.0 - jnp.exp(-2.0 * r * dt)) + 1e-12
+        return dist.MultivariateNormal(loc=loc, covariance_matrix=jnp.diag(var))
+
+
 class MatchOutcomeObservation(ObservationModel):
     r"""Pairwise match-outcome observation acting on a joint-local state.
 
@@ -218,6 +290,13 @@ class BivariatePoissonScoreObservation(ObservationModel):
     correlation rate, and $h$ an optional additive home advantage on the home team's
     scoring rate.
 
+    Per-match covariates may be supplied through the observation control ``u`` (e.g.
+    via ``obs_controls`` / ``predict_controls``), interpreted as
+    ``u = [neutral, friendly]``: the home advantage is scaled to $h\,(1-\text{neutral})$
+    (so neutral-venue matches get no home edge) and the baseline rate is shifted by
+    ``friendly_offset * friendly`` (friendlies often have a different scoring level).
+    With ``u=None`` the model reduces to a constant home advantage and baseline.
+
     Note:
         As with :class:`MatchOutcomeObservation`, the EKF (Taylor) factorial filter
         is **forward-only** for this observation: the score potential depends on the
@@ -239,6 +318,7 @@ class BivariatePoissonScoreObservation(ObservationModel):
     alpha: Float[Array, ""]
     beta: Float[Array, ""]
     home_advantage: Float[Array, ""]
+    friendly_offset: Float[Array, ""]
     num_local_factors: int = eqx.field(static=True)
     factor_state_dim: int = eqx.field(static=True)
     max_goals: int = eqx.field(static=True)
@@ -248,6 +328,7 @@ class BivariatePoissonScoreObservation(ObservationModel):
         alpha: float | int | Float[Array, ""] = 0.0,
         beta: float | int | Float[Array, ""] = -1.5,
         home_advantage: float | int | Float[Array, ""] = 0.0,
+        friendly_offset: float | int | Float[Array, ""] = 0.0,
         *,
         num_local_factors: int = 2,
         factor_state_dim: int = 2,
@@ -257,7 +338,10 @@ class BivariatePoissonScoreObservation(ObservationModel):
         Args:
             alpha: Baseline log scoring rate $\\alpha$.
             beta: Log shared-goals correlation rate $\\beta$.
-            home_advantage: Additive home-team log-rate shift $h$.
+            home_advantage: Additive home-team log-rate shift $h$ (scaled by
+                ``1 - neutral`` when a per-match ``u = [neutral, friendly]`` is given).
+            friendly_offset: Additive baseline-rate shift applied when ``friendly``
+                (the second control) is set.
             num_local_factors: Factors per observation (must be ``2``).
             factor_state_dim: Per-factor state dimension (must be ``2``).
             max_goals: Convolution-sum cap of the bivariate Poisson.
@@ -275,6 +359,7 @@ class BivariatePoissonScoreObservation(ObservationModel):
         self.alpha = jnp.asarray(alpha, dtype=float)
         self.beta = jnp.asarray(beta, dtype=float)
         self.home_advantage = jnp.asarray(home_advantage, dtype=float)
+        self.friendly_offset = jnp.asarray(friendly_offset, dtype=float)
         self.num_local_factors = int(num_local_factors)
         self.factor_state_dim = int(factor_state_dim)
         self.max_goals = int(max_goals)
@@ -283,8 +368,17 @@ class BivariatePoissonScoreObservation(ObservationModel):
         x = jnp.reshape(x, (self.num_local_factors, self.factor_state_dim))
         att_i, def_i = x[0, 0], x[0, 1]
         att_j, def_j = x[1, 0], x[1, 1]
-        lam1 = jnp.exp(self.alpha + self.home_advantage + att_i - def_j)
-        lam2 = jnp.exp(self.alpha + att_j - def_i)
+        neutral, friendly = 0.0, 0.0
+        if u is not None:
+            u = jnp.atleast_1d(jnp.asarray(u, dtype=float))
+            if u.shape[0] >= 1:
+                neutral = u[0]
+            if u.shape[0] >= 2:
+                friendly = u[1]
+        home = self.home_advantage * (1.0 - neutral)
+        alpha_eff = self.alpha + self.friendly_offset * friendly
+        lam1 = jnp.exp(alpha_eff + home + att_i - def_j)
+        lam2 = jnp.exp(alpha_eff + att_j - def_i)
         lam3 = jnp.exp(self.beta)
         return BivariatePoisson(lam1, lam2, lam3, max_goals=self.max_goals)
 
@@ -508,6 +602,7 @@ def factorial_score_probabilities(
     n_samples: int = 1000,
     max_goals_grid: int = 6,
     t: float | int | Real[Array, ""] = 0.0,
+    controls: Float[Array, "predict control_dim"] | None = None,
 ) -> tuple[Float[Array, "predict goals goals"], Float[Array, "predict three"]]:
     r"""Monte-Carlo predicted scoreline grids and win/draw/loss for future matches.
 
@@ -532,6 +627,8 @@ def factorial_score_probabilities(
         n_samples: Number of Monte-Carlo skill samples per match.
         max_goals_grid: Maximum goals ``G`` shown per team in the score grid.
         t: Time passed to the observation model (unused by scoreline models).
+        controls: Optional per-match covariates ``(P, control_dim)`` passed to the
+            observation as ``u`` (e.g. ``[neutral, friendly]`` flags).
 
     Returns:
         ``(score_grids, win_draw_loss)`` where ``score_grids`` has shape
@@ -544,21 +641,28 @@ def factorial_score_probabilities(
     t_arr = jnp.asarray(t, dtype=float)
     aa, bb = jnp.meshgrid(jnp.arange(g + 1), jnp.arange(g + 1), indexing="ij")
     grid_values = jnp.stack([aa.ravel(), bb.ravel()], axis=-1).astype(float)
+    if controls is None:
+        controls_arr = jnp.zeros((P, 0))
+    else:
+        controls_arr = jnp.asarray(controls, dtype=float).reshape(P, -1)
 
-    def per_match(key_p, mean_p, chol_p):
+    def per_match(key_p, mean_p, chol_p, u_p):
+        u = u_p if u_p.shape[-1] > 0 else None
         eps = jax.random.normal(key_p, (n_samples, n_local, d))
         samples = mean_p[None] + jnp.einsum("lij,nlj->nli", chol_p, eps)
         joint = samples.reshape(n_samples, n_local * d)
 
         def grid_for_sample(xj):
-            edist = observation_model(xj, None, t_arr)
+            edist = observation_model(xj, u, t_arr)
             return jnp.exp(edist.log_prob(grid_values))
 
         grids = jax.vmap(grid_for_sample)(joint)  # (n_samples, (g+1)^2)
         return jnp.mean(grids, axis=0).reshape(g + 1, g + 1)
 
     keys = jax.random.split(key, P)
-    score_grids = jax.vmap(per_match)(keys, predicted_means, predicted_chol_covs)
+    score_grids = jax.vmap(per_match)(
+        keys, predicted_means, predicted_chol_covs, controls_arr
+    )
 
     home_win = jnp.sum(jnp.tril(score_grids, k=-1), axis=(-2, -1))
     away_win = jnp.sum(jnp.triu(score_grids, k=1), axis=(-2, -1))

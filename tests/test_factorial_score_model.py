@@ -14,6 +14,7 @@ from dynestyx import (
     FactorialEKFSmootherConfig,
     FactorialPFConfig,
     Filter,
+    OrnsteinUhlenbeckEvolution,
     RandomWalkEvolution,
     Smoother,
     factorial_score_probabilities,
@@ -133,3 +134,141 @@ def test_score_prediction_grids_and_wdl():
     assert wdl.shape == (P, 3)
     assert jnp.allclose(wdl.sum(axis=-1), 1.0, atol=1e-6)
     assert jnp.all(wdl >= 0.0)
+
+
+def test_score_observation_per_match_controls():
+    """u=[neutral, friendly] scales home advantage and offsets the baseline rate."""
+    obs = BivariatePoissonScoreObservation(
+        alpha=0.0,
+        beta=-2.0,
+        home_advantage=0.5,
+        friendly_offset=0.3,
+        factor_state_dim=2,
+    )
+    x = jnp.array([0.4, 0.1, 0.2, 0.3])  # [att_i, def_i, att_j, def_j]
+    d_none = obs(x, None, 0.0)
+    d_neutral = obs(x, jnp.array([1.0, 0.0]), 0.0)
+    d_friendly = obs(x, jnp.array([0.0, 1.0]), 0.0)
+    # lam1 = exp(alpha + friendly_off*friendly + home_adv*(1-neutral) + att_i - def_j)
+    assert jnp.allclose(d_none.lam1, jnp.exp(0.5 + 0.4 - 0.3))
+    assert jnp.allclose(
+        d_neutral.lam1, jnp.exp(0.0 + 0.4 - 0.3)
+    )  # home advantage removed
+    assert jnp.allclose(
+        d_friendly.lam1, jnp.exp(0.3 + 0.5 + 0.4 - 0.3)
+    )  # baseline shifted
+
+
+def test_obs_controls_change_filter_loglik():
+    """Supplying obs_controls (neutral flags) changes the filter marginal likelihood."""
+    from dynestyx.inference.integrations.cuthbert.factorial_filter import (
+        compute_factorial_filter,
+    )
+
+    fm = FactorialDynamicalModel(
+        initial_condition=dist.MultivariateNormal(jnp.zeros(D), 0.4 * jnp.eye(D)),
+        state_evolution=RandomWalkEvolution(
+            tau=jnp.array([0.3, 0.3]), factor_state_dim=D
+        ),
+        observation_model=BivariatePoissonScoreObservation(
+            alpha=0.2, beta=-1.5, home_advantage=0.4, factor_state_dim=D, max_goals=12
+        ),
+        num_factors=F,
+        num_local_factors=2,
+        t0=0.0,
+    )
+    controls = jnp.zeros((K, 2)).at[:, 0].set(1.0)  # all neutral -> no home advantage
+    ll_home, *_ = compute_factorial_filter(
+        fm,
+        FactorialEKFConfig(),
+        None,
+        obs_times=OBS_TIMES,
+        obs_values=SCORES,
+        obs_factor_indices=OBS_IDX,
+    )
+    ll_neutral, *_ = compute_factorial_filter(
+        fm,
+        FactorialEKFConfig(),
+        None,
+        obs_times=OBS_TIMES,
+        obs_values=SCORES,
+        obs_factor_indices=OBS_IDX,
+        obs_controls=controls,
+    )
+    assert jnp.isfinite(ll_home) and jnp.isfinite(ll_neutral)
+    assert not jnp.allclose(ll_home, ll_neutral)
+
+
+def test_ou_evolution_transition_and_limits():
+    """OU transition matches the analytic mean/variance and its stationary/BM limits."""
+    r, s0, mu = 0.8, 0.6, 0.3
+    ou = OrnsteinUhlenbeckEvolution(
+        reversion_rate=r, equilibrium_scale=s0, long_run_mean=mu, factor_state_dim=1
+    )
+    x = jnp.array([1.0])
+    for dt in (0.5, 2.0):
+        d = ou(x, None, 0.0, dt)
+        decay = jnp.exp(-r * dt)
+        assert jnp.allclose(d.mean[0], decay + mu * (1.0 - decay))
+        assert jnp.allclose(
+            d.covariance_matrix[0, 0], s0**2 * (1.0 - jnp.exp(-2.0 * r * dt)), atol=1e-9
+        )
+    # dt -> infinity: stationary distribution N(mu, s0^2).
+    d_inf = ou(x, None, 0.0, 1e6)
+    assert jnp.allclose(d_inf.mean[0], mu, atol=1e-4)
+    assert jnp.allclose(d_inf.covariance_matrix[0, 0], s0**2, atol=1e-4)
+    # dt = 0: identity transition with (near-)zero variance.
+    d0 = ou(x, None, 5.0, 5.0)
+    assert jnp.allclose(d0.mean[0], 1.0)
+    assert float(d0.covariance_matrix[0, 0]) < 1e-9
+
+
+def test_ou_evolution_differentiable_vector():
+    """OU log_prob is finite and differentiable in (reversion_rate, equilibrium_scale)."""
+
+    def loss(p):
+        ou = OrnsteinUhlenbeckEvolution(
+            reversion_rate=p[0],
+            equilibrium_scale=p[1],
+            long_run_mean=0.0,
+            factor_state_dim=2,
+        )
+        return ou(jnp.array([0.5, -0.2]), None, 0.0, 1.5).log_prob(
+            jnp.array([0.3, 0.1])
+        )
+
+    g = jax.grad(loss)(jnp.array([0.5, 0.7]))
+    assert jnp.all(jnp.isfinite(g))
+
+
+def test_ou_score_model_filter_smoke():
+    """A d=2 score model with OU skill dynamics filters to finite loglik + right shapes."""
+    fm = FactorialDynamicalModel(
+        initial_condition=dist.MultivariateNormal(jnp.zeros(D), 0.5 * jnp.eye(D)),
+        state_evolution=OrnsteinUhlenbeckEvolution(
+            reversion_rate=jnp.array([0.5, 0.5]),
+            equilibrium_scale=jnp.array([0.5, 0.5]),
+            long_run_mean=jnp.zeros(D),
+            factor_state_dim=D,
+        ),
+        observation_model=BivariatePoissonScoreObservation(
+            alpha=0.2, beta=-1.5, factor_state_dim=D, max_goals=12
+        ),
+        num_factors=F,
+        num_local_factors=2,
+        t0=0.0,
+    )
+
+    def model():
+        with Filter(filter_config=FactorialEKFConfig(record_filtered_states_mean=True)):
+            dsx.sample(
+                "sc",
+                fm,
+                obs_times=OBS_TIMES,
+                obs_values=SCORES,
+                obs_factor_indices=OBS_IDX,
+            )
+
+    pr = Predictive(model, num_samples=1)(jax.random.PRNGKey(0))
+    assert jnp.isfinite(pr["sc_marginal_loglik"][0])
+    assert pr["sc_filtered_states_mean"].shape == (1, F, D)
