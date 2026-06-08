@@ -49,6 +49,7 @@ nav:
       - Reproducing Duffield et al. (tennis WTA): deep_dives/duffield_tennis_wta.ipynb
       - Reproducing Duffield et al. (chess): deep_dives/duffield_chess.ipynb
       - Reproducing Duffield et al. (football EPL): deep_dives/duffield_football_epl.ipynb
+      - Variational training of factorial models: deep_dives/factorial_variational_training.ipynb
   - API Reference:
     - api_reference/index.md
     - Public API:
