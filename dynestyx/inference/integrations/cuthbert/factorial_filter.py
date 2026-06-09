@@ -598,7 +598,14 @@ def _add_sites_factorial(name: str, final_state, local_seq, record_kwargs: dict)
         final_chols = jnp.linalg.cholesky(cov + 1e-9 * jnp.eye(cov.shape[-1]))
         lw = jax.nn.softmax(local_seq.log_weights, axis=-1)  # (K, n_local, N)
         local_means = jnp.einsum("knp,knpd->knd", lw, local_seq.particles)
-        local_chols = None
+        # Particle-weighted local covariance, so the PF records the same local
+        # chol-cov site as the EKF (used for per-match uncertainty bands / parity).
+        local_centered = local_seq.particles - local_means[:, :, None, :]
+        local_covs = jnp.einsum(
+            "knp,knpi,knpj->knij", lw, local_centered, local_centered
+        )
+        d_local = local_covs.shape[-1]
+        local_chols = jnp.linalg.cholesky(local_covs + 1e-9 * jnp.eye(d_local))
 
     add_mean = _should_record_field(
         record_kwargs["record_filtered_states_mean"], final_means.shape, max_elems

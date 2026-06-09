@@ -76,6 +76,11 @@ def test_score_model_filter_shapes(config_factory):
     assert jnp.isfinite(pr["sc_marginal_loglik"][0])
     assert pr["sc_filtered_states_mean"].shape == (1, F, D)
     assert pr["sc_filtered_states_chol_cov"].shape == (1, F, D, D)
+    # Per-match local mean + chol-cov recorded by both backends (PF computes the
+    # particle-weighted local covariance, matching the EKF) -- used for uncertainty bands.
+    assert pr["sc_filtered_local_states_mean"].shape == (1, K, 2, D)
+    assert pr["sc_filtered_local_states_chol_cov"].shape == (1, K, 2, D, D)
+    assert jnp.all(jnp.isfinite(pr["sc_filtered_local_states_chol_cov"][0]))
 
 
 def test_score_model_rejects_scalar_state():
@@ -241,6 +246,11 @@ def test_nb_score_model_filter_shapes(config_factory):
     assert jnp.isfinite(pr["sc_marginal_loglik"][0])
     assert pr["sc_filtered_states_mean"].shape == (1, F, D)
     assert pr["sc_filtered_states_chol_cov"].shape == (1, F, D, D)
+    # Per-match local mean + chol-cov recorded by both backends (PF computes the
+    # particle-weighted local covariance, matching the EKF) -- used for uncertainty bands.
+    assert pr["sc_filtered_local_states_mean"].shape == (1, K, 2, D)
+    assert pr["sc_filtered_local_states_chol_cov"].shape == (1, K, 2, D, D)
+    assert jnp.all(jnp.isfinite(pr["sc_filtered_local_states_chol_cov"][0]))
 
 
 def test_nb_score_model_rejects_scalar_state():
