@@ -4927,7 +4927,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h1 id="attackdefense-bivariate-poisson-models-for-world-cup-scores">Attack/defense bivariate-Poisson models for World Cup scores<a class="anchor-link" href="#attackdefense-bivariate-poisson-models-for-world-cup-scores">¶</a></h1><p><strong>Deep dive.</strong> This notebook builds a <em>factorial state-space model</em> (fSSM) of international soccer that predicts scorelines (and, <em>a fortiori</em>, outcomes) for the 2026 FIFA World Cup. We generally follow the methodology of <a href="https://academic.oup.com/jrsssc/article/73/5/1262/7734616?login=true">Duffield et al. (2024)</a>, and the related backend repo <a href="https://github.com/state-space-models/cuthberto-carlos"><code>cuthberto-carlos</code></a>. (In fact, you should think of things here mostly as a convenient frontent for cuthberto-carlos... unless they're wrong, then it's most likely my fault, not theirs).</p>
 <p>The model here extends a simple win/draw/loss-based skill model by separately modeling each team's attack and defensive skill, with goals for/against as observations. This results in a type of bivariate Poisson goal likelihood.</p>
 <p>We write the corresponding models in <code>dynestyx</code> using a special <code>FactorialDynamicalModel</code> construction; this lets us efficiently learn hyperparamters in the usual <code>dynestyx</code> way, e.g., by MAP (<code>numpyro.SVI</code> with an <code>AutoDelta</code> guide under an SMC approximation). We evaluate the fitted MAP model online, and compare the MAP parameters against a posterior obtained via NUTS + the EM-based results reported by Duffield et al.</p>
-<p>The model is pretty simple: each team carries a <em>two-dimensional</em> latent skill: attacking and defensive strength. These evolve over time as Brownian motion, and a match's scoreline is modelled with the bivariate Poisson distribution of <a href="https://doi.org/10.1111/1467-9884.00366">Karlis &amp; Ntzoufras (2003)</a> (Duffield et al. 2024, §4.6):</p>
+<p>The model is pretty simple: each team carries a <em>two-dimensional</em> latent skill: attacking and defensive strength. These evolve over time as Brownian motion, and a match's scoreline is modelled with the bivariate Poisson distribution of <a href="https://doi.org/10.1111/1467-9884.00366">Karlis &amp; Ntzoufras (2003)</a>, as used by Duffield et al. (2024, §4.6):</p>
 <p>$$
 \begin{aligned}
 p(x^i_0) &amp;= \mathcal{N}(\mu_0, \Sigma_0), \\
@@ -6830,19 +6830,26 @@ fig.tight_layout(); plt.show()</div>
 </div>
 </div>
 </div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ead27f9a">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Overall, we have some positive signals towards the MAP/NUTS-based inference here. Probably not enough reliable signal here, but signal nonetheless.</p>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e72e833f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="9-does-more-data-or-more-decisive-dynamics-help">9. Does more data — or more decisive dynamics — help?<a class="anchor-link" href="#9-does-more-data-or-more-decisive-dynamics-help">¶</a></h2><p>Is there anything to gain from a <em>richer</em> dataset or <em>more decisive</em> dynamics? We test a few paths:</p>
-<ul>
-<li><strong>richer data</strong> — give every World Cup team its <em>full</em> schedule (matches vs all opponents, not just head-to-head among the 48);</li>
-<li><strong>neutral-aware home advantage</strong> and a <strong>friendly flag</strong> (per-match observation controls <code>u = [neutral, friendly]</code>);</li>
-<li>larger online evaluation sets.</li>
-</ul>
-<p>We score a Duffield-like <em>decisive</em> model (large $\Sigma_0$, $\tau$, plus a home-advantage term) on the full schedules by its out-of-sample scoreline NLL and outcome accuracy. The PF's <em>forward</em> pass is used at this scale (~5k matches, ~200 teams) — its reverse-mode/fitting pass is memory-bound, but online evaluation is forward-only, so the faithful PF is affordable.</p>
+<h2 id="9-does-more-data-or-more-decisive-dynamics-help">9. Does more data — or more decisive dynamics — help?<a class="anchor-link" href="#9-does-more-data-or-more-decisive-dynamics-help">¶</a></h2><p>We can also try to consider richer datasets. For example, give every World Cup team's full schedule (not just head-to-heads versus other World Cup teams). We can also fix some issues in the current data, like the fact that the "home team" in international matches is often not, in fact, at home, and that friendlies have a different incentive structure that can mess up our results.</p>
+<p>We score a Duffield et al.-like <em>decisive</em> model (large $\Sigma_0$, $\tau$, plus a home-advantage term) on the full schedules by its out-of-sample scoreline NLL and outcome accuracy. The PF's <em>forward</em> pass is used at this scale (~5k matches, ~200 teams) — its reverse-mode/fitting pass is memory-bound, but online evaluation is forward-only, so the faithful PF is affordable.</p>
+<p>(TODO: we should really just fit these models with SVI.)</p>
 </div>
 </div>
 </div>
