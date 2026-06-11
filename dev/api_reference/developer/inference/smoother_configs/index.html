@@ -4688,6 +4688,9 @@ differentiable nonlinear dynamics when local linearization is a reasonable
 approximation to the filtering and smoothing distributions.</p>
 <p>This is exact (but wasteful) for linear-Gaussian models. For those models,
 prefer <code>KFSmootherConfig</code>.</p>
+<p>The inherited <code>use_taylor</code> option selects moments vs Taylor linearization
+for both the forward (filter) and backward (RTS) passes; see
+:class:<code>EKFConfig</code>.</p>
 <p>Does not support missing observations (data cannot have NaNs).</p>
 
 
@@ -4801,8 +4804,9 @@ factorial model is embarrassingly parallel across factors (the local
 observations are fully absorbed during filtering), so each factor's skill
 trajectory is smoothed independently with a single-factor backward pass.</p>
 <p>The marginal log-likelihood reported as a NumPyro factor comes from the
-forward filtering pass. See :class:<code>FactorialEKFConfig</code> for inherited options
-and <code>BaseSmootherConfig</code> for the <code>record_smoothed_*</code> options.</p>
+forward filtering pass, which honours the inherited <code>use_taylor</code>
+moments/Taylor selection. See :class:<code>FactorialEKFConfig</code> for inherited
+options and <code>BaseSmootherConfig</code> for the <code>record_smoothed_*</code> options.</p>
 
 
 

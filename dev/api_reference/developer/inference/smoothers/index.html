@@ -4772,6 +4772,9 @@ differentiable nonlinear dynamics when local linearization is a reasonable
 approximation to the filtering and smoothing distributions.</p>
 <p>This is exact (but wasteful) for linear-Gaussian models. For those models,
 prefer <code>KFSmootherConfig</code>.</p>
+<p>The inherited <code>use_taylor</code> option selects moments vs Taylor linearization
+for both the forward (filter) and backward (RTS) passes; see
+:class:<code>EKFConfig</code>.</p>
 <p>Does not support missing observations (data cannot have NaNs).</p>
 
 

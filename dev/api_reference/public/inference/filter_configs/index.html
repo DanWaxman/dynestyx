@@ -4768,6 +4768,26 @@ This provides a more numerically stable implementation of the Kalman filter.</p>
 via a first-order Taylor expansion. It is fast and simple, but may
 not work well for strongly nonlinear models. The Taylor series expansion
 is automatically performed via Jax autodiff.</p>
+<p>With the <code>cuthbert</code> backend the linearization comes in two flavours,
+selected by <code>use_taylor</code>:</p>
+<ul>
+<li><strong>Moments linearization</strong> (<code>cuthbert.gaussian.moments</code>): the conditional
+  distributions' exact <code>mean</code> and covariance (<code>covariance_matrix</code> or
+  <code>scale_tril</code>) are used directly; only the Jacobian of the mean is
+  computed (no Hessian). Available when the initial-condition,
+  state-evolution, and observation distributions all expose a covariance
+  (e.g. Gaussians, :class:<code>~dynestyx.models.distributions.BivariatePoisson</code>,
+  :class:<code>~dynestyx.models.distributions.BivariateNegativeBinomial</code>).</li>
+<li><strong>Taylor linearization</strong> (<code>cuthbert.gaussian.taylor</code>): gradient and
+  Hessian of the log-densities. Works for any distribution with a
+  <code>log_prob</code>, but the Hessian can be rank-deficient (handled by NaN-dim
+  masking, which makes the marginal log-likelihood non-differentiable).</li>
+</ul>
+<p>On linear-Gaussian models the two are mathematically identical. For a
+nonlinear observation mean the moments flavour is the textbook
+Jacobian-based EKF (exact noise covariance, no residual-curvature terms),
+while the Taylor flavour includes Hessian corrections; results differ
+slightly.</p>
 <p>This is exact (but wasteful) for linear-Gaussian models.</p>
 <p>In the current interface with the <code>cd_dynamax</code> discrete-time backend,
 time-varying models silently ignore absolute time arguments.
@@ -4814,6 +4834,22 @@ skips observation linearisation.</p>
               </div>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="dynestyx.inference.filter_configs.EKFConfig.use_taylor">use_taylor</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Linearization flavour for the <code>cuthbert</code>
+backend. <code>None</code> <em>(default)</em> auto-selects: moments linearization
+when every required distribution exposes exact moments, else Taylor.
+<code>True</code> forces Taylor linearization. <code>False</code> requires moments and
+raises <code>TypeError</code> when a distribution exposes none. Ignored by
+the <code>cd_dynamax</code> backend.</p>
+              </div>
+            </td>
+          </tr>
       </tbody>
     </table>
         <details class="note">
@@ -4829,7 +4865,8 @@ linearizations of <span class="arithmatex">\(f\)</span> and <span class="arithma
 and proceeds via the typical Kalman update.</p>
 <p>References:</p>
 <ul>
-<li>The <code>cuthbert</code> implementation of the EKF is based on the <code>taylor_kf</code> module therein.
+<li>The <code>cuthbert</code> implementation of the EKF is based on the <code>taylor_kf</code> module therein
+    (and on <code>cuthbert.gaussian.moments</code> for the moments flavour).
     See the <a href="https://state-space-models.github.io/cuthbert/cuthbert_api/gaussian/taylor/">cuthbert documentation</a> for more information.</li>
 <li>For a more modern textbook reference, see Chapter 7 of: Särkkä, S., &amp; Svensson, L. (2023).
     Bayesian Filtering and Smoothing (Vol. 17). Cambridge University Press.

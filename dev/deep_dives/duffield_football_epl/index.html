@@ -1607,6 +1607,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#a-differentiable-ekf-moment-matching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A differentiable EKF: moment matching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#using-an-overdispersed-alternative" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5420,13 +5431,14 @@ print(f"  held-out test NLL {r_o_map['test_nll']:.3f}   (Duffield ExKF test 0.96
                            <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">match_idx</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">max_goals_grid</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">split_nll</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s2">"wdl"</span><span class="p">],</span> <span class="n">out</span><span class="p">[</span><span class="s2">"outcomes"</span><span class="p">],</span> <span class="n">test_start</span><span class="p">),</span> <span class="n">out</span>
 
+<span class="n">r_bp_taylor</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">bp_wdl_nll</span><span class="p">(</span><span class="o">*</span><span class="n">EXKF_ab</span><span class="p">,</span> <span class="mf">0.00975808</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">(</span><span class="n">use_taylor</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 <span class="n">r_bp_exkf</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">bp_wdl_nll</span><span class="p">(</span><span class="o">*</span><span class="n">EXKF_ab</span><span class="p">,</span> <span class="mf">0.00975808</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">(),</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 <span class="n">r_bp_smc</span><span class="p">,</span> <span class="n">bp_out</span> <span class="o">=</span> <span class="n">bp_wdl_nll</span><span class="p">(</span><span class="o">*</span><span class="n">SMC_ab</span><span class="p">,</span> <span class="mf">0.00923287</span><span class="p">,</span> <span class="n">SMC_init_cov</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s2">"Method"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Bivariate-Poisson EKF"</span><span class="p">,</span> <span class="s2">"Bivariate-Poisson SMC"</span><span class="p">],</span>
-    <span class="s2">"dynestyx W/D/L train"</span><span class="p">:</span> <span class="p">[</span><span class="n">r_bp_exkf</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">],</span> <span class="n">r_bp_smc</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">]],</span>
-    <span class="s2">"dynestyx W/D/L test"</span><span class="p">:</span>  <span class="p">[</span><span class="n">r_bp_exkf</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">],</span>  <span class="n">r_bp_smc</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]],</span>
-    <span class="s2">"Duffield W/D/L test"</span><span class="p">:</span>  <span class="p">[</span><span class="mf">0.954</span><span class="p">,</span> <span class="mf">0.956</span><span class="p">],</span>
+    <span class="s2">"Method"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Bivariate-Poisson EKF (Taylor)"</span><span class="p">,</span> <span class="s2">"Bivariate-Poisson EKF (moments)"</span><span class="p">,</span> <span class="s2">"Bivariate-Poisson SMC"</span><span class="p">],</span>
+    <span class="s2">"dynestyx W/D/L train"</span><span class="p">:</span> <span class="p">[</span><span class="n">r_bp_taylor</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">],</span> <span class="n">r_bp_exkf</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">],</span> <span class="n">r_bp_smc</span><span class="p">[</span><span class="s2">"train_nll"</span><span class="p">]],</span>
+    <span class="s2">"dynestyx W/D/L test"</span><span class="p">:</span>  <span class="p">[</span><span class="n">r_bp_taylor</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">],</span>  <span class="n">r_bp_exkf</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">],</span>  <span class="n">r_bp_smc</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]],</span>
+    <span class="s2">"Duffield W/D/L test"</span><span class="p">:</span>  <span class="p">[</span><span class="mf">0.954</span><span class="p">,</span> <span class="mf">0.954</span><span class="p">,</span> <span class="mf">0.956</span><span class="p">],</span>
 <span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-5">EXKF_init_cov = jnp.array([[0.08750192, 0.06225643], [0.06225643, 0.05477126]])
@@ -5449,13 +5461,14 @@ def bp_wdl_nll(alpha_h, alpha_a, beta, tau, init_cov, config, key, n_samples=400
                            obs_factor_indices=match_idx, key=key, n_samples=n_samples, max_goals_grid=7)
     return split_nll(out["wdl"], out["outcomes"], test_start), out
 
+r_bp_taylor, _ = bp_wdl_nll(*EXKF_ab, 0.00975808, EXKF_init_cov, FactorialEKFConfig(use_taylor=True), jax.random.PRNGKey(0))
 r_bp_exkf, _ = bp_wdl_nll(*EXKF_ab, 0.00975808, EXKF_init_cov, FactorialEKFConfig(), jax.random.PRNGKey(0))
 r_bp_smc, bp_out = bp_wdl_nll(*SMC_ab, 0.00923287, SMC_init_cov, FactorialPFConfig(n_particles=1000), jax.random.PRNGKey(0))
 pd.DataFrame({
-    "Method": ["Bivariate-Poisson EKF", "Bivariate-Poisson SMC"],
-    "dynestyx W/D/L train": [r_bp_exkf["train_nll"], r_bp_smc["train_nll"]],
-    "dynestyx W/D/L test":  [r_bp_exkf["test_nll"],  r_bp_smc["test_nll"]],
-    "Duffield W/D/L test":  [0.954, 0.956],
+    "Method": ["Bivariate-Poisson EKF (Taylor)", "Bivariate-Poisson EKF (moments)", "Bivariate-Poisson SMC"],
+    "dynestyx W/D/L train": [r_bp_taylor["train_nll"], r_bp_exkf["train_nll"], r_bp_smc["train_nll"]],
+    "dynestyx W/D/L test":  [r_bp_taylor["test_nll"],  r_bp_exkf["test_nll"],  r_bp_smc["test_nll"]],
+    "Duffield W/D/L test":  [0.954, 0.954, 0.956],
 }).round(3)</div>
 </div>
 </div>
@@ -5495,13 +5508,20 @@ pd.DataFrame({
 <tbody>
 <tr>
 <th>0</th>
-<td>Bivariate-Poisson EKF</td>
+<td>Bivariate-Poisson EKF (Taylor)</td>
 <td>1.016</td>
 <td>1.001</td>
 <td>0.954</td>
 </tr>
 <tr>
 <th>1</th>
+<td>Bivariate-Poisson EKF (moments)</td>
+<td>0.974</td>
+<td>0.954</td>
+<td>0.954</td>
+</tr>
+<tr>
+<th>2</th>
 <td>Bivariate-Poisson SMC</td>
 <td>0.975</td>
 <td>0.952</td>
@@ -5523,7 +5543,7 @@ pd.DataFrame({
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>The SMC bivariate-Poisson model's held-out W/D/L NLL clearly improves upon the plain outcome model, which is a main claim of the paper. In particular, by targetting the more difficult problem of scorecard prediction, we predict W/D/L better. Statistics is funny like that.</p>
-<p>The EKF row is <em>biased high</em> here: unlike the scalar models, the bivariate-Poisson likelihood depends on the 4-D joint skill only through two contrasts, so its observation Hessian is rank-deficient and the EKF is forward-only — its filtered states (hence W/D/L) degrade. The <strong>particle filter, which needs no such linearization, is the faithful backend</strong> and is what reproduces the result (consistent with the smaller EKF bias seen for the scalar sports).</p>
+<p>The <strong>Taylor</strong> EKF row is <em>biased high</em>: unlike the scalar models, the bivariate-Poisson likelihood depends on the 4-D joint skill only through two contrasts, so its observation Hessian is rank-deficient and that filter is forward-only — its filtered states (hence W/D/L) degrade. The default <strong>moments</strong> EKF row (new in dynestyx, mirroring an upstream cuthberto-carlos change — more on it below) avoids the Hessian entirely and closes most of the gap to the <strong>particle filter, which needs no linearization at all and remains the faithful reference backend</strong>.</p>
 </div>
 </div>
 </div>
@@ -5534,7 +5554,7 @@ pd.DataFrame({
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="fitting-a-model">Fitting a Model<a class="anchor-link" href="#fitting-a-model">¶</a></h3><p>Since the EKF as-implemented has a rank-deficient Hessian, it will be difficult to use in gradient-based Bayesian inference procedures. SMC has no such problem! We fit the parameters $\alpha$, $\beta$, $h$, and $\tau$ via a MAP estimate, with a simple prior on each parameter.</p>
+<h3 id="fitting-a-model">Fitting a Model<a class="anchor-link" href="#fitting-a-model">¶</a></h3><p>Since the <em>Taylor</em> EKF has a rank-deficient Hessian, it cannot drive gradient-based Bayesian inference (its gradients are NaN). SMC has no such problem! We fit the parameters $\alpha$, $\beta$, $h$, and $\tau$ via a MAP estimate, with a simple prior on each parameter. (We will revisit this same fit with the differentiable <em>moments</em> EKF just below.)</p>
 </div>
 </div>
 </div>
@@ -5569,13 +5589,15 @@ pd.DataFrame({
     <span class="n">dsx</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s1">'score'</span><span class="p">,</span> <span class="n">bp_model</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">home_adv</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
                <span class="n">obs_times</span><span class="o">=</span><span class="n">train_t</span><span class="p">,</span> <span class="n">obs_values</span><span class="o">=</span><span class="n">train_g</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">train_i</span><span class="p">)</span>
 
+<span class="n">_t0_fit</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
 <span class="k">with</span> <span class="n">Filter</span><span class="p">(</span><span class="n">filter_config</span><span class="o">=</span><span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">crn_seed</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))):</span>
     <span class="n">bp_guide</span> <span class="o">=</span> <span class="n">AutoDelta</span><span class="p">(</span><span class="n">bp_fit_model</span><span class="p">)</span>
     <span class="n">bp_svi</span> <span class="o">=</span> <span class="n">SVI</span><span class="p">(</span><span class="n">bp_fit_model</span><span class="p">,</span> <span class="n">bp_guide</span><span class="p">,</span> <span class="n">optax</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">Trace_ELBO</span><span class="p">())</span>
     <span class="n">bp_svi_result</span> <span class="o">=</span> <span class="n">bp_svi</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">300</span><span class="p">,</span> <span class="n">progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">pf_fit_seconds</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">_t0_fit</span>
 <span class="n">bp_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">bp_guide</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">bp_svi_result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 <span class="n">alpha_f</span><span class="p">,</span> <span class="n">beta_f</span><span class="p">,</span> <span class="n">home_f</span><span class="p">,</span> <span class="n">tau_f</span> <span class="o">=</span> <span class="n">bp_map</span><span class="p">[</span><span class="s1">'alpha'</span><span class="p">],</span> <span class="n">bp_map</span><span class="p">[</span><span class="s1">'beta'</span><span class="p">],</span> <span class="n">bp_map</span><span class="p">[</span><span class="s1">'home_adv'</span><span class="p">],</span> <span class="n">bp_map</span><span class="p">[</span><span class="s1">'tau'</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"MAP fit (SVI+AutoDelta, PF): alpha=</span><span class="si">{</span><span class="n">alpha_f</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, beta=</span><span class="si">{</span><span class="n">beta_f</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, home_adv=</span><span class="si">{</span><span class="n">home_f</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, tau=</span><span class="si">{</span><span class="n">tau_f</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"MAP fit (SVI+AutoDelta, PF): alpha=</span><span class="si">{</span><span class="n">alpha_f</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, beta=</span><span class="si">{</span><span class="n">beta_f</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, home_adv=</span><span class="si">{</span><span class="n">home_f</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, tau=</span><span class="si">{</span><span class="n">tau_f</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">pf_fit_seconds</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">s]"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Duffield (EM):       alpha_a=</span><span class="si">{</span><span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, beta=</span><span class="si">{</span><span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, "</span>
       <span class="sa">f</span><span class="s2">"home_adv=</span><span class="si">{</span><span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
@@ -5595,13 +5617,15 @@ def bp_fit_model():
     dsx.sample('score', bp_model(alpha, beta, home_adv, tau, EXKF_init_cov, t0=None),
                obs_times=train_t, obs_values=train_g, obs_factor_indices=train_i)
 
+_t0_fit = time.perf_counter()
 with Filter(filter_config=FactorialPFConfig(n_particles=300, crn_seed=jax.random.PRNGKey(0))):
     bp_guide = AutoDelta(bp_fit_model)
     bp_svi = SVI(bp_fit_model, bp_guide, optax.adam(0.05), loss=Trace_ELBO())
     bp_svi_result = bp_svi.run(jax.random.PRNGKey(0), 300, progress_bar=False)
+pf_fit_seconds = time.perf_counter() - _t0_fit
 bp_map = {k: float(v) for k, v in bp_guide.median(bp_svi_result.params).items()}
 alpha_f, beta_f, home_f, tau_f = bp_map['alpha'], bp_map['beta'], bp_map['home_adv'], bp_map['tau']
-print(f"MAP fit (SVI+AutoDelta, PF): alpha={alpha_f:.3f}, beta={beta_f:.3f}, home_adv={home_f:.3f}, tau={tau_f:.4f}")
+print(f"MAP fit (SVI+AutoDelta, PF): alpha={alpha_f:.3f}, beta={beta_f:.3f}, home_adv={home_f:.3f}, tau={tau_f:.4f}  [{pf_fit_seconds:.0f}s]")
 print(f"Duffield (EM):       alpha_a={EXKF_ab[1]:.3f}, beta={EXKF_ab[2]:.3f}, "
       f"home_adv={EXKF_ab[0]-EXKF_ab[1]:.3f}")
 
@@ -5619,7 +5643,7 @@ print(f"  held-out W/D/L test NLL with self-fitted params: {r_fit['test_nll']:.3
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>MAP fit (SVI+AutoDelta, PF): alpha=0.125, beta=-4.363, home_adv=0.159, tau=0.0031
+<pre>MAP fit (SVI+AutoDelta, PF): alpha=0.125, beta=-4.363, home_adv=0.159, tau=0.0031  [287s]
 Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 </pre>
 </div>
@@ -5631,6 +5655,347 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 </pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f9c788a0">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="a-differentiable-ekf-moment-matching">A differentiable EKF: moment matching<a class="anchor-link" href="#a-differentiable-ekf-moment-matching">¶</a></h3><p>The Taylor EKF's problem above is the <em>Hessian</em>. There is a neat alternative, adopted upstream in <a href="https://github.com/state-space-models/cuthberto-carlos/pull/2">cuthberto-carlos PR #2</a>: the bivariate Poisson has <strong>exact conditional moments</strong>,</p>
+<p>$$
+\mathbb{E}[y \mid x] = \begin{pmatrix} \lambda_1 + \lambda_3 \\ \lambda_2 + \lambda_3 \end{pmatrix},
+\qquad
+\mathrm{Cov}[y \mid x] = \begin{pmatrix} \lambda_1 + \lambda_3 &amp; \lambda_3 \\ \lambda_3 &amp; \lambda_2 + \lambda_3 \end{pmatrix},
+$$</p>
+<p>so instead of Taylor-expanding the log-density we can hand <code>cuthbert.gaussian.moments</code> the mean and covariance functions directly. The filter then linearizes only the <em>mean</em> (one Jacobian, no Hessian), and the rank-deficiency problem evaporates: the marginal log-likelihood becomes deterministic <strong>and differentiable</strong>.</p>
+<p><code>dynestyx</code> now auto-selects this flavour whenever the model's distributions expose a covariance (<code>use_taylor=None</code>, the default — which is exactly why the plain-<code>FactorialEKFConfig()</code> row in the table above improved); <code>use_taylor=True</code> forces the previous Taylor behaviour.</p>
+<p>Same Duffield parameters, three backends — likelihood value, speed per filter pass, and gradient health:</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bca8e7a1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dynestyx.inference.integrations.cuthbert.factorial_filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_factorial_filter</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bp_loglik_fn</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loglik</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">alpha_h</span><span class="p">,</span> <span class="n">alpha_a</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">log_tau</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">bp_model</span><span class="p">(</span><span class="n">alpha_a</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">alpha_h</span> <span class="o">-</span> <span class="n">alpha_a</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_tau</span><span class="p">),</span> <span class="n">EXKF_init_cov</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">ll</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">compute_factorial_filter</span><span class="p">(</span>
+            <span class="n">m</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">obs_times</span><span class="o">=</span><span class="n">match_times</span><span class="p">,</span> <span class="n">obs_values</span><span class="o">=</span><span class="n">match_goals</span><span class="p">,</span> <span class="n">obs_factor_indices</span><span class="o">=</span><span class="n">match_idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ll</span>
+    <span class="k">return</span> <span class="n">loglik</span>
+
+<span class="n">params0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.00975808</span><span class="p">)])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">time_jitted</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+    <span class="n">fn_j</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">(</span><span class="n">fn_j</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>  <span class="c1"># compile + warm up</span>
+    <span class="n">laps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+        <span class="n">jax</span><span class="o">.</span><span class="n">block_until_ready</span><span class="p">(</span><span class="n">fn_j</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">laps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">laps</span><span class="p">)</span>
+
+<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">"EKF (Taylor)"</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">(</span><span class="n">use_taylor</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"EKF (moments)"</span><span class="p">,</span> <span class="n">FactorialEKFConfig</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s2">"SMC (1000 particles)"</span><span class="p">,</span> <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">1000</span><span class="p">)),</span>
+<span class="p">]:</span>
+    <span class="n">ll</span><span class="p">,</span> <span class="n">secs</span> <span class="o">=</span> <span class="n">time_jitted</span><span class="p">(</span><span class="n">bp_loglik_fn</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="n">params0</span><span class="p">)</span>
+    <span class="n">grad</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">bp_loglik_fn</span><span class="p">(</span><span class="n">config</span><span class="p">))(</span><span class="n">params0</span><span class="p">)</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s2">"Method"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+        <span class="s2">"marginal loglik"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span>
+        <span class="s2">"ms / filter pass"</span><span class="p">:</span> <span class="mf">1e3</span> <span class="o">*</span> <span class="n">secs</span><span class="p">,</span>
+        <span class="s2">"gradient finite"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">grad</span><span class="p">))),</span>
+    <span class="p">})</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">({</span><span class="s2">"marginal loglik"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"ms / filter pass"</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-7">from dynestyx.inference.integrations.cuthbert.factorial_filter import compute_factorial_filter
+
+def bp_loglik_fn(config):
+    def loglik(params):
+        alpha_h, alpha_a, beta, log_tau = params
+        m = bp_model(alpha_a, beta, alpha_h - alpha_a, jnp.exp(log_tau), EXKF_init_cov, t0=0.0)
+        ll, *_ = compute_factorial_filter(
+            m, config, jax.random.PRNGKey(0),
+            obs_times=match_times, obs_values=match_goals, obs_factor_indices=match_idx)
+        return ll
+    return loglik
+
+params0 = jnp.array([EXKF_ab[0], EXKF_ab[1], EXKF_ab[2], jnp.log(0.00975808)])
+
+def time_jitted(fn, x, repeats=7):
+    fn_j = jax.jit(fn)
+    out = jax.block_until_ready(fn_j(x))  # compile + warm up
+    laps = []
+    for _ in range(repeats):
+        t0 = time.perf_counter()
+        jax.block_until_ready(fn_j(x))
+        laps.append(time.perf_counter() - t0)
+    return out, min(laps)
+
+rows = []
+for label, config in [
+    ("EKF (Taylor)", FactorialEKFConfig(use_taylor=True)),
+    ("EKF (moments)", FactorialEKFConfig()),
+    ("SMC (1000 particles)", FactorialPFConfig(n_particles=1000)),
+]:
+    ll, secs = time_jitted(bp_loglik_fn(config), params0)
+    grad = jax.grad(bp_loglik_fn(config))(params0)
+    rows.append({
+        "Method": label,
+        "marginal loglik": float(ll),
+        "ms / filter pass": 1e3 * secs,
+        "gradient finite": bool(jnp.all(jnp.isfinite(grad))),
+    })
+pd.DataFrame(rows).round({"marginal loglik": 1, "ms / filter pass": 1})</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>Method</th>
+<th>marginal loglik</th>
+<th>ms / filter pass</th>
+<th>gradient finite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>EKF (Taylor)</td>
+<td>3793.0</td>
+<td>65.6</td>
+<td>False</td>
+</tr>
+<tr>
+<th>1</th>
+<td>EKF (moments)</td>
+<td>-4753.6</td>
+<td>9.9</td>
+<td>True</td>
+</tr>
+<tr>
+<th>2</th>
+<td>SMC (1000 particles)</td>
+<td>-4451.1</td>
+<td>1990.4</td>
+<td>True</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=542f0c11">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># The same MAP fit as above, now through the deterministic, differentiable</span>
+<span class="c1"># moments-EKF marginal likelihood (no particles, no common random numbers).</span>
+<span class="n">_t0_fit</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">Filter</span><span class="p">(</span><span class="n">filter_config</span><span class="o">=</span><span class="n">FactorialEKFConfig</span><span class="p">()):</span>
+    <span class="n">bp_guide_ekf</span> <span class="o">=</span> <span class="n">AutoDelta</span><span class="p">(</span><span class="n">bp_fit_model</span><span class="p">)</span>
+    <span class="n">bp_svi_ekf</span> <span class="o">=</span> <span class="n">SVI</span><span class="p">(</span><span class="n">bp_fit_model</span><span class="p">,</span> <span class="n">bp_guide_ekf</span><span class="p">,</span> <span class="n">optax</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">Trace_ELBO</span><span class="p">())</span>
+    <span class="n">bp_svi_ekf_result</span> <span class="o">=</span> <span class="n">bp_svi_ekf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">300</span><span class="p">,</span> <span class="n">progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ekf_fit_seconds</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">_t0_fit</span>
+<span class="n">bp_map_ekf</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">bp_guide_ekf</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">bp_svi_ekf_result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SVI wall-clock (300 steps): moments-EKF </span><span class="si">{</span><span class="n">ekf_fit_seconds</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">s vs PF </span><span class="si">{</span><span class="n">pf_fit_seconds</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">s"</span><span class="p">)</span>
+<span class="n">a_e</span><span class="p">,</span> <span class="n">b_e</span><span class="p">,</span> <span class="n">h_e</span><span class="p">,</span> <span class="n">t_e</span> <span class="o">=</span> <span class="p">(</span><span class="n">bp_map_ekf</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"alpha"</span><span class="p">,</span> <span class="s2">"beta"</span><span class="p">,</span> <span class="s2">"home_adv"</span><span class="p">,</span> <span class="s2">"tau"</span><span class="p">))</span>
+<span class="n">r_fit_ekf</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">bp_wdl_nll</span><span class="p">(</span><span class="n">a_e</span> <span class="o">+</span> <span class="n">h_e</span><span class="p">,</span> <span class="n">a_e</span><span class="p">,</span> <span class="n">b_e</span><span class="p">,</span> <span class="n">t_e</span><span class="p">,</span> <span class="n">EXKF_init_cov</span><span class="p">,</span>
+                          <span class="n">FactorialPFConfig</span><span class="p">(</span><span class="n">n_particles</span><span class="o">=</span><span class="mi">1000</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"held-out W/D/L test NLL (PF-scored): moments-EKF fit </span><span class="si">{</span><span class="n">r_fit_ekf</span><span class="p">[</span><span class="s1">'test_nll'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> "</span>
+      <span class="sa">f</span><span class="s2">"vs PF fit </span><span class="si">{</span><span class="n">r_fit</span><span class="p">[</span><span class="s1">'test_nll'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  (Duffield BP test 0.954)"</span><span class="p">)</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">"moments-EKF MAP"</span><span class="p">:</span> <span class="n">bp_map_ekf</span><span class="p">,</span>
+    <span class="s2">"PF MAP"</span><span class="p">:</span> <span class="n">bp_map</span><span class="p">,</span>
+    <span class="s2">"Duffield (EM)"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"alpha"</span><span class="p">:</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"beta"</span><span class="p">:</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                      <span class="s2">"home_adv"</span><span class="p">:</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">EXKF_ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"tau"</span><span class="p">:</span> <span class="mf">0.00975808</span><span class="p">},</span>
+<span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-8"># The same MAP fit as above, now through the deterministic, differentiable
+# moments-EKF marginal likelihood (no particles, no common random numbers).
+_t0_fit = time.perf_counter()
+with Filter(filter_config=FactorialEKFConfig()):
+    bp_guide_ekf = AutoDelta(bp_fit_model)
+    bp_svi_ekf = SVI(bp_fit_model, bp_guide_ekf, optax.adam(0.05), loss=Trace_ELBO())
+    bp_svi_ekf_result = bp_svi_ekf.run(jax.random.PRNGKey(0), 300, progress_bar=False)
+ekf_fit_seconds = time.perf_counter() - _t0_fit
+bp_map_ekf = {k: float(v) for k, v in bp_guide_ekf.median(bp_svi_ekf_result.params).items()}
+
+print(f"SVI wall-clock (300 steps): moments-EKF {ekf_fit_seconds:.0f}s vs PF {pf_fit_seconds:.0f}s")
+a_e, b_e, h_e, t_e = (bp_map_ekf[k] for k in ("alpha", "beta", "home_adv", "tau"))
+r_fit_ekf, _ = bp_wdl_nll(a_e + h_e, a_e, b_e, t_e, EXKF_init_cov,
+                          FactorialPFConfig(n_particles=1000), jax.random.PRNGKey(0))
+print(f"held-out W/D/L test NLL (PF-scored): moments-EKF fit {r_fit_ekf['test_nll']:.3f} "
+      f"vs PF fit {r_fit['test_nll']:.3f}  (Duffield BP test 0.954)")
+
+pd.DataFrame({
+    "moments-EKF MAP": bp_map_ekf,
+    "PF MAP": bp_map,
+    "Duffield (EM)": {"alpha": EXKF_ab[1], "beta": EXKF_ab[2],
+                      "home_adv": EXKF_ab[0] - EXKF_ab[1], "tau": 0.00975808},
+}).round(4)</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>SVI wall-clock (300 steps): moments-EKF 25s vs PF 287s
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>held-out W/D/L test NLL (PF-scored): moments-EKF fit 0.952 vs PF fit 0.949  (Duffield BP test 0.954)
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>moments-EKF MAP</th>
+<th>PF MAP</th>
+<th>Duffield (EM)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>alpha</th>
+<td>0.1722</td>
+<td>0.1254</td>
+<td>0.1086</td>
+</tr>
+<tr>
+<th>beta</th>
+<td>-4.4833</td>
+<td>-4.3629</td>
+<td>-4.4857</td>
+</tr>
+<tr>
+<th>home_adv</th>
+<td>0.1375</td>
+<td>0.1595</td>
+<td>0.1549</td>
+</tr>
+<tr>
+<th>tau</th>
+<td>0.0030</td>
+<td>0.0031</td>
+<td>0.0098</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=935ade25">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Takeaway.</strong> The moments EKF turns the bivariate-Poisson factorial model into something you can do gradient-based inference on: its marginal log-likelihood is deterministic, ~200× faster per pass than SMC(1000) here (and ~7× faster than the Taylor EKF — no Hessian to build), and — unlike the Taylor EKF — has finite gradients, so SVI/MAP (and NUTS) run directly through the filter. The 300-step MAP fit takes seconds rather than minutes and lands on essentially the same parameters and held-out W/D/L NLL as the particle-filter fit; with Duffield's own parameters its W/D/L test NLL exactly reproduces their published EXKF figure (0.954), where our Taylor flavour was badly biased (1.001).</p>
+<p>Two caveats keep the particle filter relevant: the moments likelihood <em>value</em> is still a Gaussian approximation — here ~0.2 nats/match below the asymptotically exact SMC estimate (the Taylor value was wildly biased in the <em>other</em> direction, landing above zero) — and a Gaussian belief can genuinely misrepresent a skewed posterior. Use the PF as the reference when that matters; <code>use_taylor=True</code> preserves the old Taylor behaviour for comparison.</p>
 </div>
 </div>
 </div>
@@ -5651,10 +6016,10 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-9">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5698,7 +6063,7 @@ Duffield (EM):       alpha_a=0.109, beta=-4.486, home_adv=0.155
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'held-out W/D/L test NLL:  Poisson </span><span class="si">{</span><span class="n">r_fit</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">   '</span>
       <span class="sa">f</span><span class="s1">'Negative-Binomial </span><span class="si">{</span><span class="n">r_nb_res</span><span class="p">[</span><span class="s2">"test_nll"</span><span class="p">]</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">   (Duffield 0.954)'</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-7">def bp_model_nb(alpha, home_adv, log_tau, log_disp, init_cov, t0=0.0):
+<div class="clipboard-copy-txt" id="cell-9">def bp_model_nb(alpha, home_adv, log_tau, log_disp, init_cov, t0=0.0):
     return FactorialDynamicalModel(
         initial_condition=dist.MultivariateNormal(jnp.zeros(2), init_cov),
         state_evolution=RandomWalkEvolution(tau=jnp.exp(log_tau) * jnp.ones(2), factor_state_dim=2),
@@ -5778,10 +6143,10 @@ held-out W/D/L test NLL:  Poisson 0.949   Negative-Binomial 0.951   (Duffield 0.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-10">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5828,7 +6193,7 @@ held-out W/D/L test NLL:  Poisson 0.949   Negative-Binomial 0.951   (Duffield 0.
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"year"</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-8">m = bp_model(alpha_f, beta_f, home_f, tau_f, EXKF_init_cov, t0=None)  # our MAP-fitted parameters
+<div class="clipboard-copy-txt" id="cell-10">m = bp_model(alpha_f, beta_f, home_f, tau_f, EXKF_init_cov, t0=None)  # our MAP-fitted parameters
 
 
 def _filter_program():
@@ -5887,10 +6252,10 @@ plt.tight_layout(); plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-9">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-11">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -5913,7 +6278,7 @@ plt.tight_layout(); plt.show()</div>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted scoreline: </span><span class="si">{</span><span class="n">home</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">away</span><span class="si">}</span><span class="se">\n</span><span class="s2">(actual </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">match_goals</span><span class="p">[</span><span class="n">pick</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">match_goals</span><span class="p">[</span><span class="n">pick</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"probability"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-9"># Predicted scoreline grid for the last fixture between two strong clubs.
+<div class="clipboard-copy-txt" id="cell-11"># Predicted scoreline grid for the last fixture between two strong clubs.
 pick = None
 for k in range(K - 1, -1, -1):
     if id_to_name[int(idx_np[k, 0])] in clubs and id_to_name[int(idx_np[k, 1])] in clubs:
@@ -5959,10 +6324,10 @@ plt.colorbar(im, label="probability"); plt.tight_layout(); plt.show()</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
-<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-10">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-12">
 <div>
 <span class="notice" hidden="">Copied!</span>
 <svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
@@ -6000,7 +6365,7 @@ plt.colorbar(im, label="probability"); plt.tight_layout(); plt.show()</div>
 <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Online scoreline forecasts on held-out matches — W/D/L accuracy </span><span class="si">{</span><span class="n">acc</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-10">grids = np.asarray(bp_online_out["score_grids"])
+<div class="clipboard-copy-txt" id="cell-12">grids = np.asarray(bp_online_out["score_grids"])
 gv = np.arange(grids.shape[-1])
 ph = grids.sum(2); pa = grids.sum(1)  # marginal home / away goal distributions
 exp_home = (ph * gv).sum(1); exp_away = (pa * gv).sum(1)

@@ -5227,6 +5227,26 @@ for solver options.</p>
 via a first-order Taylor expansion. It is fast and simple, but may
 not work well for strongly nonlinear models. The Taylor series expansion
 is automatically performed via Jax autodiff.</p>
+<p>With the <code>cuthbert</code> backend the linearization comes in two flavours,
+selected by <code>use_taylor</code>:</p>
+<ul>
+<li><strong>Moments linearization</strong> (<code>cuthbert.gaussian.moments</code>): the conditional
+  distributions' exact <code>mean</code> and covariance (<code>covariance_matrix</code> or
+  <code>scale_tril</code>) are used directly; only the Jacobian of the mean is
+  computed (no Hessian). Available when the initial-condition,
+  state-evolution, and observation distributions all expose a covariance
+  (e.g. Gaussians, :class:<code>~dynestyx.models.distributions.BivariatePoisson</code>,
+  :class:<code>~dynestyx.models.distributions.BivariateNegativeBinomial</code>).</li>
+<li><strong>Taylor linearization</strong> (<code>cuthbert.gaussian.taylor</code>): gradient and
+  Hessian of the log-densities. Works for any distribution with a
+  <code>log_prob</code>, but the Hessian can be rank-deficient (handled by NaN-dim
+  masking, which makes the marginal log-likelihood non-differentiable).</li>
+</ul>
+<p>On linear-Gaussian models the two are mathematically identical. For a
+nonlinear observation mean the moments flavour is the textbook
+Jacobian-based EKF (exact noise covariance, no residual-curvature terms),
+while the Taylor flavour includes Hessian corrections; results differ
+slightly.</p>
 <p>This is exact (but wasteful) for linear-Gaussian models.</p>
 <p>In the current interface with the <code>cd_dynamax</code> discrete-time backend,
 time-varying models silently ignore absolute time arguments.
@@ -5273,6 +5293,22 @@ skips observation linearisation.</p>
               </div>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="dynestyx.inference.filter_configs.EKFConfig.use_taylor">use_taylor</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Linearization flavour for the <code>cuthbert</code>
+backend. <code>None</code> <em>(default)</em> auto-selects: moments linearization
+when every required distribution exposes exact moments, else Taylor.
+<code>True</code> forces Taylor linearization. <code>False</code> requires moments and
+raises <code>TypeError</code> when a distribution exposes none. Ignored by
+the <code>cd_dynamax</code> backend.</p>
+              </div>
+            </td>
+          </tr>
       </tbody>
     </table>
         <details class="note">
@@ -5288,7 +5324,8 @@ linearizations of <span class="arithmatex">\(f\)</span> and <span class="arithma
 and proceeds via the typical Kalman update.</p>
 <p>References:</p>
 <ul>
-<li>The <code>cuthbert</code> implementation of the EKF is based on the <code>taylor_kf</code> module therein.
+<li>The <code>cuthbert</code> implementation of the EKF is based on the <code>taylor_kf</code> module therein
+    (and on <code>cuthbert.gaussian.moments</code> for the moments flavour).
     See the <a href="https://state-space-models.github.io/cuthbert/cuthbert_api/gaussian/taylor/">cuthbert documentation</a> for more information.</li>
 <li>For a more modern textbook reference, see Chapter 7 of: Särkkä, S., &amp; Svensson, L. (2023).
     Bayesian Filtering and Smoothing (Vol. 17). Cambridge University Press.
@@ -5538,8 +5575,12 @@ inverse problems, where other particle methods like particle filters often strug
 <p>The default (and recommended) filter for factorial models with non-linear or
 non-Gaussian local observations, such as the sigmoidal match-outcome model of
 Duffield et al. (2024). Each pairwise update linearizes the local observation
-via JAX autodiff (the cuthbert Taylor/linearized Kalman backend) over only the
-factors involved in that observation.</p>
+over only the factors involved in that observation — via exact conditional
+moments when the observation distribution exposes them (<code>use_taylor=None</code>,
+the default; e.g. :class:<code>~dynestyx.models.BivariatePoissonScoreObservation</code>
+and :class:<code>~dynestyx.models.BivariateNegativeBinomialScoreObservation</code>), and
+via JAX-autodiff Taylor linearization of the log-density otherwise (e.g. the
+categorical :class:<code>~dynestyx.models.MatchOutcomeObservation</code>).</p>
 <p>Used only with a :class:<code>~dynestyx.models.FactorialDynamicalModel</code>; the factor
 indices for each observation are supplied via the <code>obs_factor_indices</code>
 keyword of <code>dsx.sample</code>. Associative/parallel-in-time scans are not
@@ -5548,17 +5589,18 @@ supported for factorial filtering.</p>
 
 <details class="note" open>
   <summary>Note</summary>
-  <p>For <em>local</em> observations that depend only on a contrast of the involved
-factors (e.g. a match outcome depending on the skill <em>difference</em>), the
-Taylor linearization of the observation potential is rank-deficient, so
-the marginal log-likelihood is <strong>not differentiable</strong> through this filter
-(gradients are NaN). This matches Duffield et al. (2024), who estimate
-parameters via EM / dedicated estimators rather than autodiff. Use the
-EKF for forward filtering (current rankings), smoothing (historical
-trajectories), and prediction; for <em>gradient-based</em> parameter inference
-use :class:<code>FactorialPFConfig</code> (or a grid/profile likelihood over the EKF
-forward pass).</p>
-</details>        <p>See :class:<code>EKFConfig</code> for the (inherited) tuning and recording options.</p>
+  <p>Under <strong>Taylor</strong> linearization (<code>use_taylor=True</code>, or the default for
+observations without exact moments), <em>local</em> observations that depend
+only on a contrast of the involved factors (e.g. a match outcome
+depending on the skill <em>difference</em>) yield a rank-deficient observation
+Hessian, so the marginal log-likelihood is <strong>not differentiable</strong> through
+the filter (gradients are NaN) — use :class:<code>FactorialPFConfig</code> for
+gradient-based parameter inference there. Under <strong>moments</strong> linearization
+(the default for the bivariate Poisson / negative-binomial score models)
+no Hessian is taken: the marginal log-likelihood is deterministic <em>and</em>
+differentiable, so SVI/MAP/NUTS can run directly through this filter.</p>
+</details>        <p>See :class:<code>EKFConfig</code> for the (inherited) tuning and recording options,
+including <code>use_taylor</code>.</p>
 
 
 
