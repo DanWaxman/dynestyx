@@ -41,6 +41,12 @@ class BivariatePoisson(Distribution):
     \mathrm{Pois}(y_2 - k; \lambda_2)\,\mathrm{Pois}(k; \lambda_3)$, truncated at
     ``max_goals`` (which must be at least $\min(y_1, y_2)$ for every evaluated point).
 
+    Exact first and second moments are exposed via :attr:`mean`, :attr:`variance`, and
+    :attr:`covariance_matrix`
+    ($[[\lambda_1 + \lambda_3, \lambda_3], [\lambda_3, \lambda_2 + \lambda_3]]$, always
+    positive-definite), which the moments-linearized EKF uses in place of Taylor
+    linearization of the log-density.
+
     Attributes:
         lam1, lam2, lam3 (jax.Array): The component rates $\lambda_1, \lambda_2,
             \lambda_3 > 0$ (broadcast to the batch shape).
@@ -120,6 +126,19 @@ class BivariatePoisson(Distribution):
     def mean(self) -> Float[Array, "*batch two"]:
         return jnp.stack([self.lam1 + self.lam3, self.lam2 + self.lam3], axis=-1)
 
+    @property
+    def variance(self) -> Float[Array, "*batch two"]:
+        return jnp.stack([self.lam1 + self.lam3, self.lam2 + self.lam3], axis=-1)
+
+    @property
+    def covariance_matrix(self) -> Float[Array, "*batch two two"]:
+        lam1 = jnp.broadcast_to(self.lam1, self.batch_shape)
+        lam2 = jnp.broadcast_to(self.lam2, self.batch_shape)
+        lam3 = jnp.broadcast_to(self.lam3, self.batch_shape)
+        row1 = jnp.stack([lam1 + lam3, lam3], axis=-1)
+        row2 = jnp.stack([lam3, lam2 + lam3], axis=-1)
+        return jnp.stack([row1, row2], axis=-2)
+
 
 class BivariateNegativeBinomial(Distribution):
     r"""Bivariate negative-binomial distribution (independent overdispersed margins).
@@ -150,7 +169,9 @@ class BivariateNegativeBinomial(Distribution):
 
     closed-form and twice-differentiable in $\lambda_1, \lambda_2, r$ (no convolution
     sum), so it slots into the factorial EKF/PF filters and VI in place of
-    :class:`BivariatePoisson`.
+    :class:`BivariatePoisson`. Exact moments are exposed via :attr:`mean`,
+    :attr:`variance`, and the (diagonal) :attr:`covariance_matrix` for the
+    moments-linearized EKF.
 
     In the football score model this is the likelihood of a scoreline given two teams'
     attack/defense skills, with
@@ -237,3 +258,14 @@ class BivariateNegativeBinomial(Distribution):
     @property
     def mean(self) -> Float[Array, "*batch two"]:
         return jnp.stack([self.lam1, self.lam2], axis=-1)
+
+    @property
+    def variance(self) -> Float[Array, "*batch two"]:
+        r = self.dispersion
+        return jnp.stack(
+            [self.lam1 + self.lam1**2 / r, self.lam2 + self.lam2**2 / r], axis=-1
+        )
+
+    @property
+    def covariance_matrix(self) -> Float[Array, "*batch two two"]:
+        return self.variance[..., None] * jnp.eye(2)

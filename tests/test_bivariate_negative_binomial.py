@@ -65,6 +65,15 @@ def test_mean_property():
     assert jnp.allclose(nb.mean, jnp.array([LAM1, LAM2]))
 
 
+def test_variance_and_covariance_matrix():
+    r = 3.0
+    nb = BivariateNegativeBinomial(LAM1, LAM2, r)
+    expected_var = jnp.array([LAM1 + LAM1**2 / r, LAM2 + LAM2**2 / r])
+    assert jnp.allclose(nb.variance, expected_var)
+    # Independent margins: diagonal covariance (used by the moments-linearized EKF).
+    assert jnp.allclose(nb.covariance_matrix, jnp.diag(expected_var))
+
+
 def test_log_prob_differentiable():
     """log_prob and its gradient w.r.t. lambda1, lambda2, log r are finite (PF/VI)."""
 

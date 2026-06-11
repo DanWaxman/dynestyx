@@ -55,11 +55,14 @@ def _model():
     "config_factory",
     [
         lambda: FactorialEKFConfig(record_filtered_states_mean=True),
+        # The default ("ekf") now exercises the moments path via auto-selection;
+        # keep the Taylor flavour pinned explicitly.
+        lambda: FactorialEKFConfig(use_taylor=True, record_filtered_states_mean=True),
         lambda: FactorialPFConfig(
             n_particles=_n_particles(1500), record_filtered_states_mean=True
         ),
     ],
-    ids=["ekf", "pf"],
+    ids=["ekf", "taylor-ekf", "pf"],
 )
 def test_score_model_filter_shapes(config_factory):
     def model():
@@ -129,9 +132,9 @@ def test_score_prediction_grids_and_wdl():
         pr["sc_predicted_states_chol_cov"][0],
         key=jax.random.PRNGKey(1),
         n_samples=400,
-        max_goals_grid=8,
+        max_goals_grid=12,
     )
-    assert grids.shape == (P, 9, 9)
+    assert grids.shape == (P, 13, 13)
     assert jnp.all(grids >= 0.0)
     # Grids sum to <= 1 and close to 1 (truncated at the grid cap).
     grid_mass = grids.sum(axis=(-2, -1))
@@ -225,11 +228,14 @@ def _model_nb():
     "config_factory",
     [
         lambda: FactorialEKFConfig(record_filtered_states_mean=True),
+        # The default ("ekf") now exercises the moments path via auto-selection;
+        # keep the Taylor flavour pinned explicitly.
+        lambda: FactorialEKFConfig(use_taylor=True, record_filtered_states_mean=True),
         lambda: FactorialPFConfig(
             n_particles=_n_particles(1500), record_filtered_states_mean=True
         ),
     ],
-    ids=["ekf", "pf"],
+    ids=["ekf", "taylor-ekf", "pf"],
 )
 def test_nb_score_model_filter_shapes(config_factory):
     def model():
@@ -280,9 +286,9 @@ def test_nb_score_prediction_grids_and_wdl():
         pr["sc_predicted_states_chol_cov"][0],
         key=jax.random.PRNGKey(1),
         n_samples=400,
-        max_goals_grid=8,
+        max_goals_grid=12,
     )
-    assert grids.shape == (P, 9, 9)
+    assert grids.shape == (P, 13, 13)
     assert jnp.all(grids >= 0.0)
     grid_mass = grids.sum(axis=(-2, -1))
     assert jnp.all(grid_mass <= 1.0 + 1e-6)

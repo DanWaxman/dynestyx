@@ -9,7 +9,7 @@ import jax.numpy as jnp
 import numpyro
 import numpyro.distributions as dist
 from cuthbert import smoother as cuthbert_smoother
-from cuthbert.gaussian import kalman, taylor
+from cuthbert.gaussian import kalman, moments, taylor
 from cuthbert.smc import backward_sampler
 from cuthbertlib.resampling import multinomial, stop_gradient_decorator, systematic
 from cuthbertlib.smc.smoothing import exact_sampling, mcmc, tracing
@@ -19,6 +19,9 @@ from dynestyx.inference.integrations.cuthbert.discrete_filter import (
     CuthbertInputs,
     _config_to_filter_kwargs,
     _drop_cuthbert_dummy_step,
+    _gaussian_moments_chol,
+    _probe_ekf_moments,
+    _resolve_use_moments,
     compute_cuthbert_filter,
 )
 from dynestyx.inference.integrations.utils import (
@@ -124,6 +127,31 @@ def _taylor_get_dynamics_log_density(dynamics: DynamicalModel):
     return get_dynamics_log_density
 
 
+def _moments_get_dynamics_params(dynamics: DynamicalModel):
+    transition = cast(
+        Callable[
+            [jax.Array, jax.Array | None, jax.Array, jax.Array], dist.Distribution
+        ],
+        dynamics.state_evolution,
+    )
+
+    def get_dynamics_params(
+        state: taylor.LinearizedKalmanFilterState, mi: CuthbertInputs
+    ):
+        def mean_and_chol_cov(x):
+            d = transition(x, mi.u_prev, mi.time_prev, mi.time)
+            mean = jnp.atleast_1d(jnp.asarray(d.mean))
+            chol = _gaussian_moments_chol(d)
+            # Identity dynamics with zero noise for the noop first step.
+            mean = jnp.where(mi.is_first_step, x, mean)
+            chol = jnp.where(mi.is_first_step, jnp.zeros_like(chol), chol)
+            return mean, chol
+
+        return mean_and_chol_cov, jnp.atleast_1d(jnp.asarray(state.mean))
+
+    return get_dynamics_params
+
+
 def _pf_log_potential(dynamics: DynamicalModel):
     def log_potential(x_prev, x, mi: CuthbertInputs):
         edist = dynamics.observation_model(x, mi.u, mi.time)
@@ -208,11 +236,17 @@ def compute_cuthbert_smoother(
             smoother_obj, filtered_states, model_inputs=None, parallel=False, key=key
         )
     elif isinstance(smoother_config, EKFSmootherConfig):
-        smoother_obj = taylor.build_smoother(
-            _taylor_get_dynamics_log_density(dynamics),
-            rtol=filter_kwargs.get("rtol", None),
-            ignore_nan_dims=True,
-        )
+        available, why = _probe_ekf_moments(dynamics)
+        if _resolve_use_moments(smoother_config.use_taylor, available, why=why):
+            smoother_obj = moments.build_smoother(
+                _moments_get_dynamics_params(dynamics)
+            )
+        else:
+            smoother_obj = taylor.build_smoother(
+                _taylor_get_dynamics_log_density(dynamics),
+                rtol=filter_kwargs.get("rtol", None),
+                ignore_nan_dims=True,
+            )
         smoothed_states = cuthbert_smoother(
             smoother_obj, filtered_states, model_inputs=None, parallel=False, key=key
         )

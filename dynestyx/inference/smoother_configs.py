@@ -137,6 +137,10 @@ class EKFSmootherConfig(EKFConfig, BaseSmootherConfig):
     This is exact (but wasteful) for linear-Gaussian models. For those models,
     prefer `KFSmootherConfig`.
 
+    The inherited ``use_taylor`` option selects moments vs Taylor linearization
+    for both the forward (filter) and backward (RTS) passes; see
+    :class:`EKFConfig`.
+
     Does not support missing observations (data cannot have NaNs).
 
     Attributes:
@@ -367,8 +371,9 @@ class FactorialEKFSmootherConfig(FactorialEKFConfig, BaseSmootherConfig):
     trajectory is smoothed independently with a single-factor backward pass.
 
     The marginal log-likelihood reported as a NumPyro factor comes from the
-    forward filtering pass. See :class:`FactorialEKFConfig` for inherited options
-    and ``BaseSmootherConfig`` for the ``record_smoothed_*`` options.
+    forward filtering pass, which honours the inherited ``use_taylor``
+    moments/Taylor selection. See :class:`FactorialEKFConfig` for inherited
+    options and ``BaseSmootherConfig`` for the ``record_smoothed_*`` options.
     """
 
 

@@ -294,6 +294,27 @@ class EKFConfig(BaseFilterConfig):
     not work well for strongly nonlinear models. The Taylor series expansion
     is automatically performed via Jax autodiff.
 
+    With the `cuthbert` backend the linearization comes in two flavours,
+    selected by ``use_taylor``:
+
+    - **Moments linearization** (`cuthbert.gaussian.moments`): the conditional
+      distributions' exact ``mean`` and covariance (``covariance_matrix`` or
+      ``scale_tril``) are used directly; only the Jacobian of the mean is
+      computed (no Hessian). Available when the initial-condition,
+      state-evolution, and observation distributions all expose a covariance
+      (e.g. Gaussians, :class:`~dynestyx.models.distributions.BivariatePoisson`,
+      :class:`~dynestyx.models.distributions.BivariateNegativeBinomial`).
+    - **Taylor linearization** (`cuthbert.gaussian.taylor`): gradient and
+      Hessian of the log-densities. Works for any distribution with a
+      ``log_prob``, but the Hessian can be rank-deficient (handled by NaN-dim
+      masking, which makes the marginal log-likelihood non-differentiable).
+
+    On linear-Gaussian models the two are mathematically identical. For a
+    nonlinear observation mean the moments flavour is the textbook
+    Jacobian-based EKF (exact noise covariance, no residual-curvature terms),
+    while the Taylor flavour includes Hessian corrections; results differ
+    slightly.
+
     This is exact (but wasteful) for linear-Gaussian models.
 
     In the current interface with the `cd_dynamax` discrete-time backend,
@@ -312,6 +333,12 @@ class EKFConfig(BaseFilterConfig):
             observation maps at the cost of Hessian computation. `"zeroth"`
             skips observation linearisation.
         filter_source (FilterSource): Backend. Defaults to `"cuthbert"`.
+        use_taylor (bool | None): Linearization flavour for the `cuthbert`
+            backend. ``None`` *(default)* auto-selects: moments linearization
+            when every required distribution exposes exact moments, else Taylor.
+            ``True`` forces Taylor linearization. ``False`` requires moments and
+            raises ``TypeError`` when a distribution exposes none. Ignored by
+            the `cd_dynamax` backend.
 
     ??? note "Algorithm Reference"
         The EKF propagates a Gaussian approximation
@@ -328,7 +355,8 @@ class EKFConfig(BaseFilterConfig):
 
         References:
 
-        - The `cuthbert` implementation of the EKF is based on the `taylor_kf` module therein.
+        - The `cuthbert` implementation of the EKF is based on the `taylor_kf` module therein
+            (and on `cuthbert.gaussian.moments` for the moments flavour).
             See the [cuthbert documentation](https://state-space-models.github.io/cuthbert/cuthbert_api/gaussian/taylor/) for more information.
         - For a more modern textbook reference, see Chapter 7 of: Särkkä, S., & Svensson, L. (2023).
             Bayesian Filtering and Smoothing (Vol. 17). Cambridge University Press.
@@ -337,6 +365,7 @@ class EKFConfig(BaseFilterConfig):
 
     filter_source: CuthbertOrCDDynamaxFilterSource = "cuthbert"
     filter_emission_order: FilterEmissionOrder = "first"
+    use_taylor: bool | None = None
 
 
 @dataclasses.dataclass
@@ -731,8 +760,12 @@ class FactorialEKFConfig(EKFConfig):
     The default (and recommended) filter for factorial models with non-linear or
     non-Gaussian local observations, such as the sigmoidal match-outcome model of
     Duffield et al. (2024). Each pairwise update linearizes the local observation
-    via JAX autodiff (the cuthbert Taylor/linearized Kalman backend) over only the
-    factors involved in that observation.
+    over only the factors involved in that observation — via exact conditional
+    moments when the observation distribution exposes them (``use_taylor=None``,
+    the default; e.g. :class:`~dynestyx.models.BivariatePoissonScoreObservation`
+    and :class:`~dynestyx.models.BivariateNegativeBinomialScoreObservation`), and
+    via JAX-autodiff Taylor linearization of the log-density otherwise (e.g. the
+    categorical :class:`~dynestyx.models.MatchOutcomeObservation`).
 
     Used only with a :class:`~dynestyx.models.FactorialDynamicalModel`; the factor
     indices for each observation are supplied via the ``obs_factor_indices``
@@ -740,18 +773,19 @@ class FactorialEKFConfig(EKFConfig):
     supported for factorial filtering.
 
     Note:
-        For *local* observations that depend only on a contrast of the involved
-        factors (e.g. a match outcome depending on the skill *difference*), the
-        Taylor linearization of the observation potential is rank-deficient, so
-        the marginal log-likelihood is **not differentiable** through this filter
-        (gradients are NaN). This matches Duffield et al. (2024), who estimate
-        parameters via EM / dedicated estimators rather than autodiff. Use the
-        EKF for forward filtering (current rankings), smoothing (historical
-        trajectories), and prediction; for *gradient-based* parameter inference
-        use :class:`FactorialPFConfig` (or a grid/profile likelihood over the EKF
-        forward pass).
+        Under **Taylor** linearization (``use_taylor=True``, or the default for
+        observations without exact moments), *local* observations that depend
+        only on a contrast of the involved factors (e.g. a match outcome
+        depending on the skill *difference*) yield a rank-deficient observation
+        Hessian, so the marginal log-likelihood is **not differentiable** through
+        the filter (gradients are NaN) — use :class:`FactorialPFConfig` for
+        gradient-based parameter inference there. Under **moments** linearization
+        (the default for the bivariate Poisson / negative-binomial score models)
+        no Hessian is taken: the marginal log-likelihood is deterministic *and*
+        differentiable, so SVI/MAP/NUTS can run directly through this filter.
 
-    See :class:`EKFConfig` for the (inherited) tuning and recording options.
+    See :class:`EKFConfig` for the (inherited) tuning and recording options,
+    including ``use_taylor``.
     """
 
     filter_source: CuthbertOnlyFilterSource = "cuthbert"

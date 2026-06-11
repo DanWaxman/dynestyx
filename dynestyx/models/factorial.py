@@ -298,13 +298,16 @@ class BivariatePoissonScoreObservation(ObservationModel):
     With ``u=None`` the model reduces to a constant home advantage and baseline.
 
     Note:
-        As with :class:`MatchOutcomeObservation`, the EKF (Taylor) factorial filter
-        is **forward-only** for this observation: the score potential depends on the
-        4-D state only through the two contrasts ``att_i - def_j`` and
-        ``att_j - def_i``, so its linearized Hessian is rank-deficient and the
-        marginal log-likelihood is not differentiable through the EKF. Use the EKF for
-        filtering/smoothing/prediction and ``FactorialPFConfig`` (particle filter) for
-        gradient-based parameter inference.
+        The returned :class:`~dynestyx.models.distributions.BivariatePoisson` exposes
+        exact conditional moments, so the default ``FactorialEKFConfig`` uses the
+        **moments-linearized** EKF (Jacobian of the mean, exact covariance): its
+        marginal log-likelihood is deterministic *and differentiable*, supporting
+        gradient-based parameter inference (SVI/MAP/NUTS) directly through the
+        filter. Under **Taylor** linearization (``use_taylor=True``) the filter is
+        forward-only: the score potential depends on the 4-D state only through the
+        two contrasts ``att_i - def_j`` and ``att_j - def_i``, so its linearized
+        Hessian is rank-deficient and the marginal log-likelihood is not
+        differentiable (use ``FactorialPFConfig`` for gradients in that case).
 
     Attributes:
         alpha (jax.Array): Baseline log scoring rate $\alpha$.
@@ -412,12 +415,15 @@ class BivariateNegativeBinomialScoreObservation(ObservationModel):
     :class:`BivariatePoissonScoreObservation`.
 
     Note:
-        As with :class:`BivariatePoissonScoreObservation`, the EKF (Taylor) factorial
-        filter is **forward-only** for this observation (the score potential depends on the
-        4-D state only through the two contrasts ``att_i - def_j`` and ``att_j - def_i``, so
-        its linearized Hessian is rank-deficient). Use the EKF for
-        filtering/smoothing/prediction and ``FactorialPFConfig`` (particle filter) for
-        gradient-based / variational parameter inference.
+        As with :class:`BivariatePoissonScoreObservation`, the returned distribution
+        exposes exact conditional moments, so the default ``FactorialEKFConfig``
+        uses the **moments-linearized** EKF, whose marginal log-likelihood is
+        deterministic and differentiable (SVI/MAP/NUTS run directly through the
+        filter). The **Taylor** flavour (``use_taylor=True``) remains forward-only
+        for this observation (the score potential depends on the 4-D state only
+        through the two contrasts ``att_i - def_j`` and ``att_j - def_i``, so its
+        linearized Hessian is rank-deficient); use ``FactorialPFConfig`` for
+        gradients in that case.
 
     Attributes:
         alpha (jax.Array): Baseline log scoring rate $\alpha$.
