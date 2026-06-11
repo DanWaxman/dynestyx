@@ -17,10 +17,11 @@ log-likelihoods (a sequential full-joint Kalman filter and a one-shot joint
 Gaussian log-density), on fixed data so the test is deterministic.
 
 The pairwise contrast observation has a rank-deficient observation Hessian (only
-the *difference* is observed), so the EKF/Taylor marginal likelihood is *biased*
-relative to the exact value; this is characterized and pinned here too (and is
-why parameter inference should use ``FactorialKFConfig`` / ``FactorialPFConfig``,
-not ``FactorialEKFConfig``, for the likelihood value).
+the *difference* is observed), so the **Taylor** EKF marginal likelihood
+(``FactorialEKFConfig(use_taylor=True)``) is *biased* relative to the exact
+value; this is characterized and pinned here too. The default
+moments-linearized EKF takes no Hessian and is exact for these linear-Gaussian
+observations, matching ``FactorialKFConfig``.
 """
 
 import equinox as eqx
@@ -264,26 +265,46 @@ def test_factorial_kf_equals_oneshot_loglik_chain():
 
 
 def test_factorial_ekf_loglik_biased_on_contrast_but_exact_on_full_rank_obs():
-    """The EKF (Taylor) marginal loglik is biased on rank-deficient contrast obs.
+    """The *Taylor* EKF marginal loglik is biased on rank-deficient contrast obs.
 
     The contrast ``y = z_i - z_j`` leaves the sum direction unobserved (rank-
     deficient observation Hessian), so the Taylor filter's ``ignore_nan_dims``
-    path yields a *biased* marginal likelihood. A *full-rank* observation (both
-    factors observed) removes the deficiency and the EKF recovers the exact KF.
+    path yields a *biased* marginal likelihood. The default (moments-linearized)
+    EKF takes no Hessian and is exact for this linear-Gaussian observation. A
+    *full-rank* observation (both factors observed) removes the deficiency and
+    the Taylor EKF also recovers the exact KF.
     """
     F, d, idx, y = _EXACT_CASES["chain_d1"]
     mu0, S0, tau2, _, _ = _params(d)
     times = _times(len(idx))
 
-    # Contrast observation: EKF disagrees with the exact KF/joint value.
+    # Contrast observation: the Taylor EKF disagrees with the exact KF/joint
+    # value, while the default (moments) EKF matches it exactly.
     Hl_c, R_c = _H1, _R1
     kf = _factorial_loglik(
         F, d, mu0, S0, tau2, 0.0, times, idx, Hl_c, R_c, y, FactorialKFConfig()
     )
     ekf = _factorial_loglik(
+        F,
+        d,
+        mu0,
+        S0,
+        tau2,
+        0.0,
+        times,
+        idx,
+        Hl_c,
+        R_c,
+        y,
+        FactorialEKFConfig(use_taylor=True),
+    )
+    assert abs(ekf - kf) > 1e-2, "expected the Taylor EKF to be biased on contrast obs"
+    ekf_moments = _factorial_loglik(
         F, d, mu0, S0, tau2, 0.0, times, idx, Hl_c, R_c, y, FactorialEKFConfig()
     )
-    assert abs(ekf - kf) > 1e-2, "expected the EKF to be biased on contrast obs"
+    assert abs(ekf_moments - kf) < 1e-6, (
+        "moments EKF should be exact on a linear-Gaussian contrast obs"
+    )
 
     # Full-rank observation: y = [z_i, z_j] directly -> EKF == KF (no deficiency).
     Hl_full = np.array([[1.0, 0.0], [0.0, 1.0]])

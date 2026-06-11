@@ -7,7 +7,7 @@ import numpyro
 import numpyro.distributions as dist
 from cuthbert import filter as cuthbert_filter
 from cuthbert.enkf import ensemble_kalman_filter
-from cuthbert.gaussian import kalman, taylor
+from cuthbert.gaussian import kalman, moments, taylor
 from cuthbert.smc import particle_filter
 from cuthbertlib.resampling import (
     adaptive,
@@ -68,6 +68,64 @@ def _extract_gaussian_chol(d: dist.Distribution, obs_dim: int) -> jax.Array:
     if scale.size == 1 and obs_dim > 1:
         scale = jnp.full((obs_dim,), scale[0])
     return jnp.diag(scale)
+
+
+def _distribution_has_moments(d) -> bool:
+    """Whether a distribution exposes a covariance usable for moments linearization."""
+    return hasattr(d, "covariance_matrix") or hasattr(d, "scale_tril")
+
+
+def _gaussian_moments_chol(d: dist.Distribution) -> jax.Array:
+    """Cholesky factor of a distribution's covariance for moments linearization."""
+    if hasattr(d, "scale_tril"):
+        return jnp.atleast_2d(jnp.asarray(d.scale_tril))
+    if hasattr(d, "covariance_matrix"):
+        return jnp.linalg.cholesky(jnp.atleast_2d(jnp.asarray(d.covariance_matrix)))
+    raise TypeError(
+        "Moments-linearized EKF requires distributions exposing a covariance "
+        f"('covariance_matrix' or 'scale_tril'); got {type(d).__name__}. "
+        "Set use_taylor=True (or leave it None) to use Taylor linearization "
+        "of the log density instead."
+    )
+
+
+def _resolve_use_moments(use_taylor: bool | None, available: bool, *, why: str) -> bool:
+    """Resolve the EKF linearization flavour from the config and moments availability."""
+    if use_taylor is True:
+        return False
+    if use_taylor is False and not available:
+        raise TypeError(
+            f"use_taylor=False requires exact conditional moments, but {why}."
+        )
+    return available
+
+
+def _probe_ekf_moments(dynamics: DynamicalModel) -> tuple[bool, str]:
+    """Structurally check whether all conditionals expose moments (see EKFConfig)."""
+    if not _distribution_has_moments(dynamics.initial_condition):
+        return False, (
+            f"initial_condition {type(dynamics.initial_condition).__name__} exposes "
+            "no covariance ('covariance_matrix' or 'scale_tril')"
+        )
+    x0 = jnp.zeros((dynamics.state_dim,))
+    u0 = jnp.zeros((dynamics.control_dim,))
+    t0 = jnp.zeros(())
+    try:
+        d_dyn = dynamics.state_evolution(x0, u0, t0, t0 + 1.0)
+        d_obs = dynamics.observation_model(x0, u0, t0)
+    except Exception:
+        return False, "probing state_evolution/observation_model raised an exception"
+    if not _distribution_has_moments(d_dyn):
+        return False, (
+            f"state_evolution returned {type(d_dyn).__name__} without a covariance "
+            "('covariance_matrix' or 'scale_tril')"
+        )
+    if not _distribution_has_moments(d_obs):
+        return False, (
+            f"observation_model returned {type(d_obs).__name__} without a covariance "
+            "('covariance_matrix' or 'scale_tril')"
+        )
+    return True, ""
 
 
 def _check_state_independent_noise(
@@ -220,7 +278,11 @@ def compute_cuthbert_filter(
     elif isinstance(filter_config, KFConfig):
         filter_obj = _cuthbert_filter_kalman(dynamics, filter_kwargs)
     elif isinstance(filter_config, EKFConfig):
-        filter_obj = _cuthbert_filter_taylor_kf(dynamics, filter_kwargs)
+        available, why = _probe_ekf_moments(dynamics)
+        if _resolve_use_moments(filter_config.use_taylor, available, why=why):
+            filter_obj = _cuthbert_filter_moments_kf(dynamics, filter_kwargs)
+        else:
+            filter_obj = _cuthbert_filter_taylor_kf(dynamics, filter_kwargs)
     else:
         raise ValueError(
             f"Unsupported cuthbert config: {type(filter_config).__name__}. "
@@ -595,6 +657,57 @@ def _cuthbert_filter_taylor_kf(
         ignore_nan_dims=True,
     )
     return kf
+
+
+def _cuthbert_filter_moments_kf(
+    dynamics: DynamicalModel, filter_kwargs: dict | None = None
+):
+    """Moments-linearized Kalman filter: exact conditional moments, Jacobian of the mean.
+
+    Unlike the Taylor flavour there is no log-density Hessian, so the marginal
+    log-likelihood stays differentiable even for rank-deficient observation maps.
+    """
+    state_dim = dynamics.state_dim
+
+    def get_init_params(mi: CuthbertInputs):
+        dist0 = dynamics.initial_condition
+        m0 = jnp.reshape(jnp.atleast_1d(jnp.asarray(dist0.mean)), (state_dim,))
+        chol_p0 = jnp.reshape(_gaussian_moments_chol(dist0), (state_dim, state_dim))
+        return m0, chol_p0
+
+    def get_dynamics_params(
+        state: taylor.LinearizedKalmanFilterState, mi: CuthbertInputs
+    ):
+        def mean_and_chol_cov(x):
+            d = dynamics.state_evolution(x, mi.u_prev, mi.time_prev, mi.time)
+            mean = jnp.atleast_1d(jnp.asarray(d.mean))
+            chol = _gaussian_moments_chol(d)
+            # Identity dynamics with zero noise for the noop first step
+            # (mirrors the Taylor path's -1e10 quadratic).
+            mean = jnp.where(mi.is_first_step, x, mean)
+            chol = jnp.where(mi.is_first_step, jnp.zeros_like(chol), chol)
+            return mean, chol
+
+        return mean_and_chol_cov, jnp.atleast_1d(jnp.asarray(state.mean))
+
+    def get_observation_params(
+        state: taylor.LinearizedKalmanFilterState, mi: CuthbertInputs
+    ):
+        def mean_and_chol_cov(x):
+            edist = dynamics.observation_model(x, mi.u, mi.time)
+            return jnp.atleast_1d(jnp.asarray(edist.mean)), _gaussian_moments_chol(
+                edist
+            )
+
+        y = jnp.atleast_1d(jnp.asarray(mi.y, dtype=float))
+        return mean_and_chol_cov, jnp.atleast_1d(jnp.asarray(state.mean)), y
+
+    return moments.build_filter(
+        get_init_params,  # type: ignore
+        get_dynamics_params,  # type: ignore
+        get_observation_params,  # type: ignore
+        associative=False,
+    )
 
 
 def _add_sites_pf(

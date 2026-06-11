@@ -26,7 +26,7 @@ import numpyro
 import numpyro.distributions as dist
 from cuthbert.factorial import gaussian as factorial_gaussian
 from cuthbert.factorial import smc as factorial_smc
-from cuthbert.gaussian import kalman, taylor
+from cuthbert.gaussian import kalman, moments, taylor
 from cuthbert.gaussian.types import LinearizedKalmanFilterState
 from cuthbert.smc import particle_filter
 from cuthbertlib.kalman.filtering import FilterScanElement
@@ -43,6 +43,11 @@ from dynestyx.inference.filter_configs import (
     FactorialKFConfig,
     FactorialPFConfig,
     _config_to_record_kwargs,
+)
+from dynestyx.inference.integrations.cuthbert.discrete_filter import (
+    _distribution_has_moments,
+    _gaussian_moments_chol,
+    _resolve_use_moments,
 )
 from dynestyx.inference.integrations.utils import covariance_from_cholesky
 from dynestyx.models.factorial import FactorialDynamicalModel
@@ -269,6 +274,90 @@ def _factorial_taylor_filter(dynamics: FactorialDynamicalModel, filter_kwargs: d
         # the skill *difference*) yield a rank-deficient observation Hessian; the
         # NaN-dim handling treats the unconstrained direction as unobserved.
         ignore_nan_dims=filter_kwargs.get("ignore_nan_dims", True),
+    )
+
+
+def _probe_factorial_moments(
+    dynamics: FactorialDynamicalModel, model_inputs: FactorialCuthbertInputs
+) -> tuple[bool, str]:
+    """Structurally check whether the factorial conditionals expose exact moments."""
+    d = dynamics.factor_state_dim
+    joint = dynamics.num_local_factors * d
+    u = model_inputs.u[0] if model_inputs.u.shape[-1] > 0 else None
+    t0 = jnp.zeros(())
+    try:
+        d_dyn = dynamics.state_evolution(jnp.zeros((d,)), None, t0, t0 + 1.0)
+        d_obs = dynamics.observation_model(jnp.zeros((joint,)), u, t0)
+    except Exception:
+        return False, "probing state_evolution/observation_model raised an exception"
+    if not _distribution_has_moments(d_dyn):
+        return False, (
+            f"state_evolution returned {type(d_dyn).__name__} without a covariance "
+            "('covariance_matrix' or 'scale_tril')"
+        )
+    if not _distribution_has_moments(d_obs):
+        return False, (
+            f"observation_model returned {type(d_obs).__name__} without a covariance "
+            "('covariance_matrix' or 'scale_tril')"
+        )
+    return True, ""
+
+
+def _factorial_moments_filter(dynamics: FactorialDynamicalModel, filter_kwargs: dict):
+    """Moments-linearized (EKF) cuthbert filter on the joint-local state.
+
+    Uses the conditional distributions' exact means and covariances
+    (``cuthbert.gaussian.moments``); only the Jacobian of the mean is taken, so —
+    unlike the Taylor flavour — the marginal log-likelihood stays differentiable
+    for contrast-only local observations (e.g. the bivariate-Poisson scoreline).
+    """
+    n_local = dynamics.num_local_factors
+    d = dynamics.factor_state_dim
+    joint = n_local * d
+
+    def get_init_params(mi):
+        # Unused by our scan (we build the init state manually) but required to
+        # construct the cuthbert filter object.
+        return jnp.zeros((joint,)), jnp.eye(joint)
+
+    def get_dynamics_params(state: LinearizedKalmanFilterState, mi):
+        time = mi.time
+        time_prev = mi.time_prev  # (n_local,)
+
+        def mean_and_chol_cov(x):
+            xp = jnp.reshape(x, (n_local, d))
+            dists = [
+                dynamics.state_evolution(xp[j], None, time_prev[j], time)
+                for j in range(n_local)
+            ]
+            mean = jnp.concatenate(
+                [jnp.atleast_1d(jnp.asarray(td.mean)) for td in dists]
+            )
+            chol = jax.scipy.linalg.block_diag(
+                *[_gaussian_moments_chol(td) for td in dists]
+            )
+            return mean, chol
+
+        return mean_and_chol_cov, jnp.atleast_1d(jnp.asarray(state.mean))
+
+    def get_observation_params(state: LinearizedKalmanFilterState, mi):
+        u = mi.u if mi.u.shape[-1] > 0 else None
+
+        def mean_and_chol_cov(x):
+            edist = dynamics.observation_model(x, u, mi.time)
+            return (
+                jnp.atleast_1d(jnp.asarray(edist.mean)),
+                _gaussian_moments_chol(edist),
+            )
+
+        y = jnp.atleast_1d(jnp.asarray(mi.y, dtype=float))
+        return mean_and_chol_cov, jnp.atleast_1d(jnp.asarray(state.mean)), y
+
+    return moments.build_filter(
+        get_init_params,  # type: ignore[arg-type]
+        get_dynamics_params,  # type: ignore[arg-type]
+        get_observation_params,  # type: ignore[arg-type]
+        associative=False,
     )
 
 
@@ -512,7 +601,11 @@ def compute_factorial_filter(
     factorializer = factorial_gaussian.build_factorializer(_get_factorial_indices)
 
     if isinstance(config, FactorialEKFConfig):
-        filter_obj = _factorial_taylor_filter(dynamics, filter_kwargs)
+        available, why = _probe_factorial_moments(dynamics, model_inputs)
+        if _resolve_use_moments(config.use_taylor, available, why=why):
+            filter_obj = _factorial_moments_filter(dynamics, filter_kwargs)
+        else:
+            filter_obj = _factorial_taylor_filter(dynamics, filter_kwargs)
         init_state = _make_gaussian_init_state(means, chols, init_mi, linearized=True)
     elif isinstance(config, FactorialKFConfig):
         filter_obj = _factorial_kalman_filter(dynamics, filter_kwargs)

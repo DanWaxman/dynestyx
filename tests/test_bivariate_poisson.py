@@ -46,10 +46,26 @@ def test_normalizes_over_grid():
 def test_mean_and_covariance():
     bp = BivariatePoisson(L1, L2, L3, max_goals=20)
     assert jnp.allclose(bp.mean, jnp.array([L1 + L3, L2 + L3]))
+    # Exact closed-form moments (used by the moments-linearized EKF).
+    expected_cov = jnp.array([[L1 + L3, L3], [L3, L2 + L3]])
+    assert jnp.allclose(bp.covariance_matrix, expected_cov)
+    assert jnp.allclose(bp.variance, jnp.diagonal(expected_cov))
     s = bp.sample(jax.random.PRNGKey(0), (100_000,)).astype(float)
     assert jnp.allclose(s.mean(0), jnp.array([L1 + L3, L2 + L3]), atol=0.03)
     cov = jnp.cov(s.T)
-    assert abs(float(cov[0, 1]) - L3) < 0.03  # cov(Y1, Y2) == lambda3
+    assert jnp.allclose(cov, expected_cov, atol=0.05)  # MC agreement
+
+
+def test_covariance_matrix_batched():
+    bp = BivariatePoisson(
+        jnp.array([1.0, 2.0]),
+        jnp.array([1.0, 0.5]),
+        jnp.array([0.1, 0.3]),
+        max_goals=15,
+    )
+    cov = bp.covariance_matrix
+    assert cov.shape == (2, 2, 2)
+    assert jnp.allclose(cov[1], jnp.array([[2.3, 0.3], [0.3, 0.8]]))
 
 
 def test_reduces_to_independent_poissons_as_lam3_to_zero():
